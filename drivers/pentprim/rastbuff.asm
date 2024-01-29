@@ -20,6 +20,7 @@
 		include drv.inc
 		include unpack.inc
 
+
 		include rastmacs.inc
 
 		.code
@@ -184,4 +185,3 @@ rasteriseBufferSaved dword	0
 
 
 		end
-

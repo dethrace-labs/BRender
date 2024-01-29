@@ -814,7 +814,7 @@ int main(int argc, char **argv)
     br_error     r;
     br_uint_64   ticks_last, ticks_now;
     int          want_screenshot;
-    int          test_index = 0;/* BR_ASIZE(tests) - 1; */
+    int          test_index = 0; /* BR_ASIZE(tests) - 1; */
 
     BrBegin();
 

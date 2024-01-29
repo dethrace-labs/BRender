@@ -28,8 +28,8 @@ static void create_scene(br_pixelmap *screen, br_actor **_world, br_actor **_cam
     BrMaterialFindHook(BrMaterialFindFailedLoad);
 
     world = BrActorAllocate(BR_ACTOR_NONE, NULL);
-    order_table = BrZsOrderTableAllocate(1024, BR_ORDER_TABLE_LEAVE_BOUNDS | BR_ORDER_TABLE_BUCKET_SORT, BR_SORT_AVERAGE);
-    BrZsActorOrderTableSet(world, order_table);
+    // order_table = BrZsOrderTableAllocate(1024, BR_ORDER_TABLE_LEAVE_BOUNDS | BR_ORDER_TABLE_BUCKET_SORT,
+    // BR_SORT_AVERAGE); BrZsActorOrderTableSet(world, order_table);
 
     camera                 = BrActorAdd(world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
     camdata                = camera->type_data;
@@ -37,10 +37,10 @@ static void create_scene(br_pixelmap *screen, br_actor **_world, br_actor **_cam
     camdata->hither_z      = BR_SCALAR(0.1);
     camdata->aspect        = BR_DIV(BR_SCALAR(screen->width), BR_SCALAR(screen->height));
 
-    order_table->min_z = camdata->hither_z;
-    order_table->max_z = camdata->yon_z;
+    // order_table->min_z = camdata->hither_z;
+    // order_table->max_z = camdata->yon_z;
 
-    BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0), BR_SCALAR(0), BR_SCALAR(2));
+    BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0), BR_SCALAR(2), BR_SCALAR(4));
 
     cube           = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
     cube->model    = BrModelFind("cube.dat");

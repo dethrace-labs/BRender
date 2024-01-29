@@ -2,58 +2,58 @@ project(pentprim C ASM_MASM)
 
 include(h2inc)
 
-make_h2inc(pentprim "${CMAKE_CURRENT_SOURCE_DIR}/drv.h" "${CMAKE_CURRENT_BINARY_DIR}/drv.inc")
+#make_h2inc(pentprim "${CMAKE_CURRENT_SOURCE_DIR}/drv.h" "${CMAKE_CURRENT_BINARY_DIR}/drv.inc")
 
-set(USE_MMX ON)
+set(USE_MMX OFF)
 
 set(ASM_FILES
-	magicsym.asm
+	# magicsym.asm
 
-	safediv.asm
-	sar16.asm
-	decal.asm
+	# safediv.asm
+	# sar16.asm
+	# decal.asm
 
-	t_piza.asm
-	ti8_piz.asm
-	ti8_pizp.asm
-	t15_pizp.asm
-	tt15_piz.asm
-	tt16_piz.asm
-	tt24_piz.asm
+	# t_piza.asm
+	# ti8_piz.asm
+	# ti8_pizp.asm
+	# t15_pizp.asm
+	# tt15_piz.asm
+	# tt16_piz.asm
+	# tt24_piz.asm
 
-	t_pia.asm
-	ti8_pi.asm
-	ti8_pip.asm
-	t15_pip.asm
-	tt15_pi.asm
-	tt16_pi.asm
-	tt24_pi.asm
+	# t_pia.asm
+	# ti8_pi.asm
+	# ti8_pip.asm
+	# t15_pip.asm
+	# tt15_pi.asm
+	# tt16_pi.asm
+	# tt24_pi.asm
 
-	zb8.asm
-	zb8sh.asm
-	zb8p2lit.asm
-	zb8p2fla.asm
-	zb8p2ulb.asm
-	zb8p2ltb.asm
-	zb8p2flb.asm
-	zb8p2unl.asm
-	zb8awtm.asm
-	zs8.asm
-	zs8p2unl.asm
-	zs8awtm.asm
-	fpsetup.asm
-	fti8_piz.asm
+	# zb8.asm
+	# zb8sh.asm
+	# zb8p2lit.asm
+	# zb8p2fla.asm
+	# zb8p2ulb.asm
+	# zb8p2ltb.asm
+	# zb8p2flb.asm
+	# zb8p2unl.asm
+	# zb8awtm.asm
+	# zs8.asm
+	# zs8p2unl.asm
+	# zs8awtm.asm
+	# fpsetup.asm
+	# fti8_piz.asm
 
-	zb16p2ul.asm
+	# zb16p2ul.asm
 
-	pfpsetup.asm
-	fti8pizp.asm
-	fti8_pip.asm
+	# pfpsetup.asm
+	# fti8pizp.asm
+	# fti8_pip.asm
 )
 
 set(INFOGEN ${CMAKE_CURRENT_SOURCE_DIR}/infogen.pl)
 
-set(PRIM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/infogen.pl)
+set(PRIM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/prim_t8.ifg)
 
 function(add_prim base)
 	set(input_file "${CMAKE_CURRENT_SOURCE_DIR}/${base}.ifg")
@@ -68,11 +68,15 @@ function(add_prim base)
 
 	set(XXXX ${input_file} ${output_file})
 	set(PRIM_FILES ${PRIM_FILES} ${XXXX} PARENT_SCOPE)
+
 endfunction()
 
 function(add_prim_suffixed base with_suffixes)
+	message("hello world ${base}")
 	set(input_file "${CMAKE_CURRENT_SOURCE_DIR}/${base}.ifg")
 	set(output_files "${base}f.c" "${base}x.c")
+	message("${input_file}")
+	message("${output_files}")
 
 	set(args_float "")
 	set(argx_fixed "")
@@ -89,30 +93,31 @@ function(add_prim_suffixed base with_suffixes)
 		COMMAND ${PERL_EXECUTABLE} ${INFOGEN} ${args_float} < ${input_file} > "${base}f.c"
 		COMMAND ${PERL_EXECUTABLE} ${INFOGEN} ${args_fixed} < ${input_file} > "${base}x.c"
 		MAIN_DEPENDENCY ${input_file}
-		DEPENDS ${INFOGEN}
+		DEPENDS ${PRIM_FILES}
 	)
 
 	set(XXXX ${input_file} ${output_files})
 	set(PRIM_FILES ${PRIM_FILES} ${XXXX} PARENT_SCOPE)
+	message("prim files ${PRIM_FILES}")
 
-	set_property(SOURCE match.c APPEND PROPERTY OBJECT_DEPENDS ${output_files})
+	#set_property(SOURCE match.c APPEND PROPERTY OBJECT_DEPENDS ${output_files})
 endfunction()
 
-add_prim(prim_l15 "")
-add_prim(prim_l16 "")
-add_prim(prim_l24 "")
+# add_prim(prim_l15 "")
+# add_prim(prim_l16 "")
+# add_prim(prim_l24 "")
 add_prim(prim_l8  "")
-add_prim(prim_p15 "")
-add_prim(prim_p16 "")
-add_prim(prim_p24 "")
+# add_prim(prim_p15 "")
+# add_prim(prim_p16 "")
+# add_prim(prim_p24 "")
 add_prim(prim_p8  "")
-add_prim(prim_t24 "")
+# add_prim(prim_t24 "")
 
 add_prim_suffixed(prim_t8 TRUE)
-add_prim_suffixed(prm_t15 TRUE)
-add_prim_suffixed(prm_t16 TRUE)
-add_prim_suffixed(mmx_t15 FALSE)
-add_prim_suffixed(mmx_t16 FALSE)
+# add_prim_suffixed(prm_t15 FALSE)
+# add_prim_suffixed(prm_t16 FALSE)
+# add_prim_suffixed(mmx_t15 FALSE)
+# add_prim_suffixed(mmx_t16 FALSE)
 
 set_source_files_properties(${PRIM_FILES} PROPERTIES HEADER_FILE_ONLY TRUE)
 
@@ -178,7 +183,11 @@ add_library(pentprim
         work.c
         work.h
 
-		"${CMAKE_CURRENT_BINARY_DIR}/drv.inc"
+		safediv.c
+		t_piza.c
+		ti8_piz.c
+
+		#"${CMAKE_CURRENT_BINARY_DIR}/drv.inc"
 
 		${ASM_FILES}
 		${PRIM_FILES}

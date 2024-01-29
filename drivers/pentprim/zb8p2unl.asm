@@ -63,7 +63,7 @@ drawPixel:
 	cmp dx,bx ;two cycles
 	ja noPlot
 
-	mov al,[esi+eax] 
+	mov al,[esi+eax]
 
 	test al,al
 	jz noPlot
@@ -161,9 +161,9 @@ endm
 
 TriangleRender_ZT_I8_D16_POW2 macro pow2,powName
 externdef c TriangleRasterise_ZT_I8_D16&powName&:proc
-TriangleRender_ZT_I8_D16&powName proc dummy:dword, v0:ptr brp_vertex, v1:ptr brp_vertex, v2:ptr brp_vertex
+	&powName proc dummy:dword, v0:ptr brp_vertex, v1:ptr brp_vertex, v2:ptr brp_vertex
 	mov	eax,v0
-	mov	ecx,v1	
+	mov	ecx,v1
 
 	mov	edx,v2
 	mov workspace.v0,eax
@@ -257,4 +257,3 @@ fp_two			dword	2.0
 fp_conv_d		dword	(127+52-0) shl 23 + (1 shl 22)
 
 end
-

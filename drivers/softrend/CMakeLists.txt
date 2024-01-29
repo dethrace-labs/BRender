@@ -2,10 +2,10 @@ project(softrend C ASM_MASM)
 
 include(h2inc)
 
-make_h2inc(softrend "${CMAKE_CURRENT_SOURCE_DIR}/drv.h" "${CMAKE_CURRENT_BINARY_DIR}/drv.inc")
+#make_h2inc(softrend "${CMAKE_CURRENT_SOURCE_DIR}/drv.h" "${CMAKE_CURRENT_BINARY_DIR}/drv.inc")
 
 set(ASM_FILES
-        subdiv.asm
+        #subdiv.asm
 )
 set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS "-safeseh")
 
@@ -59,7 +59,7 @@ add_library(softrend
         timestmp.h
         zsrmacro.h
 
-        "${CMAKE_CURRENT_BINARY_DIR}/drv.inc"
+#        "${CMAKE_CURRENT_BINARY_DIR}/drv.inc"
 
         ${ASM_FILES}
 )
@@ -70,7 +70,7 @@ if(target_type STREQUAL SHARED_LIBRARY)
 endif()
 
 target_include_directories(softrend PRIVATE ddi)
-target_compile_definitions(softrend PRIVATE -D__386__)
+#target_compile_definitions(softrend PRIVATE -D__386__)
 
 target_link_libraries(softrend PRIVATE BRender::DDI)
 

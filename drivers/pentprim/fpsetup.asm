@@ -17,7 +17,7 @@ include fpu.inc
 ;	ebp: ptr to param block
 ;
 ;
-SETUP_FLOAT_PARAM	macro	comp,param,s_p,d_p_x,conv, unsigned:=<0>
+SETUP_FLOAT_PARAM macro	comp,param,s_p,d_p_x,conv, unsigned:=<0>
 
 		assume eax: ptr brp_vertex, ebx: ptr brp_vertex, ecx: ptr brp_vertex, edx: ptr brp_vertex
 
@@ -89,7 +89,7 @@ SETUP_FLOAT_PARAM	macro	comp,param,s_p,d_p_x,conv, unsigned:=<0>
 			 fxch	st(2)						; 	pdy_1	pdx		C+pdy_0	fdy*pdy	fpx+pt
 			fadd	conv						; 	C+pdy_1	pdx		C+pdy_0	fdy*pdy	fpx+pt
 			 fxch	st(3)						; 	fdy*pdy	pdx		C+pdy_0	C+pdy_1	fpx+pt
-			faddp	st(4),st					;	pdx		C+pdy_0	C+pdy_1	pstart		
+			faddp	st(4),st					;	pdx		C+pdy_0	C+pdy_1	pstart
 
 
 	; Convert to fixed point, pack and store in output block
@@ -276,7 +276,7 @@ SETUP_FLOAT_CONST	macro	comp,param,s_p,d_p_x,conv, unsigned:=<0>
 			fadd	conv						;	C+pstrt
 
 			mov		esi,0
-			
+
 			mov		dword ptr d_p_x,esi
 			mov		dword ptr d_p_x+4,esi
 
@@ -310,7 +310,7 @@ SETUP_FIXED_CONST	macro	comp,param,s_p,d_p_x,conv, unsigned:=<0>
 
 			mov		esi,[ebx].comp_x[comp*4]
 			mov		edi,0
-			
+
 if unsigned
 	; Remap from -1 to 1 signed to 0 to 1 unsigned
 	;
@@ -326,7 +326,7 @@ endif
 	endm
 
 
-SETUP_FLOAT	macro
+SETUP_FLOAT macro
 	local count_cont,exit,top_zero,bottom_zero,empty_triangle
 
 		assume eax: ptr brp_vertex, ebx: ptr brp_vertex, ecx: ptr brp_vertex, edx: ptr brp_vertex
@@ -557,31 +557,31 @@ endif
 
 			fmulp		st(4),st					;	dx3		dx2		XYY*R	dy1*R	dy2		dy3
 			 fxch		st(2)						;	XYY*R	dx2		dx3		dy1*R	dy2		dy3
-													
+
 			fild		m_y				            ;	m_y		XYY*R	dx2		dx3		dy1*R	dy2		dy3
 			 fxch		st(2)						;	dx2		XYY*R	m_y		dx3		dy1*R	dy2		dy3
-													
+
 			fmulp		st(6),st		            ;	XYY*R	m_y		dx3		dy1*R	dy2		dx2*dy3
-													
+
 			fild		[workspace.t_y]							;	t_y		XYY*R	m_y		dx3		dy1*R	dy2		dx2*dy3
 			 fxch		st(3)			            ;	dx3		XYY*R	m_y		t_y		dy1*R	dy2		dx2*dy3
-													
+
 			fmulp		st(5),st					;	XYY*R	m_y		t_y		dy1*R	dy2*dx3	dx2*dy3
 			 fxch		st(1)			            ;	m_y		XYY*R	t_y		dy1*R	dy2*dx3	dx2*dy3
 
 			fsub		[ebx].comp_f[C_SY*4]		;	m_dy	XYY*R	t_y		dy1*R	dy2*dx3	dx2*dy3
 			 fxch		st(3)						;	dy1*R	XYY*R	t_y		m_dy	dy2*dx3	dx2*dy3
-													
+
 			fmul		st(4),st		            ;	dy1*R	XYY*R	t_y		m_dy	YYX*R	dx2*dy3
 			 fxch		st(2)						;	t_y		XYY*R	dy1*R	m_dy	YYX*R	dx2*dy3
-													
+
 			fsub		[eax].comp_f[C_SY*4]		;	t_dy	XYY*R	dy1*R	m_dy	YYX*R	dx2*dy3
 			 fxch		st(2)						;	dy1*R	XYY*R	t_dy	m_dy	YYX*R	dx2*dy3
-													
+
 			fmulp		st(5),st		            ;	XYY*R	t_dy	m_dy	YYX*R	YXY*R
 			 fxch		st(2)						;	m_dy	t_dy	XYY*R	YYX*R	YXY*R
 													;	m_dy	t_dy	g1		gm		g2
-										            
+
 	; Work out initial X intercepts with top and middle scanlines
 	;
 	; x_major  = gm * t_dy + vt->x
@@ -591,40 +591,40 @@ endif
 													;	0		1		2		3		4		5		6		7
 			fld			st(1)						;	t_dy	m_dy	t_dy	g1		gm		g2
 			fxch		st(1)			            ;	m_dy	t_dy	t_dy	g1		gm		g2
-													
-													
+
+
 			fmul		st,st(5)		            ;	m_dy*g2	t_dy	t_dy	g1		gm		g2
 			fxch		st(2)						;	t_dy	t_dy	m_dy*g2	g1		gm		g2
-													
-			fst			[workspace.t_dy]            
-													
+
+			fst			[workspace.t_dy]
+
 			fmul		st,st(3)					;	t_dy*g1	t_dy	m_dy*g2	g1		gm		g2
 			 fxch		st(2)			            ;	m_dy*g2	t_dy	t_dy*g1	g1		gm		g2
 
 			fadd		[ebx].comp_f[C_SX*4]		;	x_2		t_dy	t_dy*g1	g1		gm		g2
 			 fxch		st(1)						;	t_dy	x_2		t_dy*g1	g1		gm		g2
-													
+
 			fmul		st,st(4)		            ;	t_dy*gm	x_2		t_dy*g1	g1		gm		g2
 			 fxch		st(2)						;	t_dy*g1	x_2		t_dy*gm	g1		gm		g2
-													
+
 			fadd		[eax].comp_f[C_SX*4]		;	x_1		x_2		t_dy*gm	g1		gm		g2
 			 fxch		st(3)						;	g1		x_2		t_dy*gm	x_1		gm		g2
-													
+
 			fadd		fp_conv_d16		            ;	g1+C	x_2		t_dy*gm	x_1		gm		g2
 			 fxch		st(2)						;	t_dy*gm	x_2		g1+C	x_1		gm		g2
-													
+
 			fadd		[eax].comp_f[C_SX*4]		;	x_m		x_2		g1+C	x_1		gm		g2
 			 fxch		st(4)						;	gm		x_2		g1+C	x_1		x_m		g2
-													
+
 			fadd		fp_conv_d16		            ;	gm+C	x_2		g1+C	x_1		x_m		g2
 			 fxch		st(1)						;	x_2		gm+C	g1+C	x_1		x_m		g2
-													
+
 			fadd	fconv_d16_12[esi*8]	            ;	x_2+C	gm+C	g1+C	x_1		x_m		g2
 			 fxch		st(5)						;	g2		gm+C	g1+C	x_1		x_m		x_2+C
-													
+
 			fadd		fp_conv_d16		            ;	g2+C	gm+C	g1+C	x_1		x_m		x_2+C
 			 fxch		st(2)						;	g1+C	gm+C	g2+C	x_1		x_m		x_2+C
-													
+
 			fstp real8 ptr [workspace].x1			;	gm+C	g2+C	x_1		x_m		x_2+C
 			fstp real8 ptr [workspace].xm			;	g2+C	x_1		x_m		x_2+C
 			fstp real8 ptr [workspace].x2			;	x_1		x_m		x_2+C
@@ -642,13 +642,13 @@ endif
 
 			mov			edi,[workspace].x2	; read fixed d_x2
 			mov		ebx,[workspace.v0]				; Start preparing for parmeter setup
-		
+
 			fstp real8 ptr [workspace].xm			;	x_1+C	x_2+C
 			fstp real8 ptr [workspace].x1			;	x_2+C
 
 			mov			ecx,[workspace].xm
 			mov			[workspace].xm+4,edx
-			
+
 			sar			ecx,16
 			mov			[workspace].x1+4,esi
 
@@ -743,7 +743,7 @@ _y				dword	?
 converted_vertex ends
 
 		assume eax: ptr brp_vertex, ebx: ptr brp_vertex, ecx: ptr brp_vertex, edx: ptr brp_vertex
-			
+
 		; Convert X,Y to float
 		;
 			fild		[eax].comp_x[C_SX*4]
@@ -866,7 +866,7 @@ converted_vertex ends
 
 			cmp			esi,edi
 			je			bottom_zero
-			
+
 
 	; Parameter gradient startup and Y deltas for edge gradients
 	;
@@ -1017,47 +1017,47 @@ count_cont:
 													;	0		1		2		3		4		5		6		7
 			fld			st(1)						;	t_dy	m_dy	t_dy	g1		gm		g2
 			fxch		st(1)						;	m_dy	t_dy	t_dy	g1		gm		g2
-										            
-										            
+
+
 			fmul		st,st(5)					;	m_dy*g2	t_dy	t_dy	g1		gm		g2
 			fxch		st(2)						;	t_dy	t_dy	m_dy*g2	g1		gm		g2
-										            
+
 			fst			[workspace.t_dy]
 
 			fmul		st,st(3)					;	t_dy*g1	t_dy	m_dy*g2	g1		gm		g2
 			 fxch		st(2)						;	m_dy*g2	t_dy	t_dy*g1	g1		gm		g2
-													
+
 			fadd		[ebx]._x		            ;	x_2		t_dy	t_dy*g1	g1		gm		g2
 			 fxch		st(1)			            ;	t_dy	x_2		t_dy*g1	g1		gm		g2
-													
+
 			fmul		st,st(4)					;	t_dy*gm	x_2		t_dy*g1	g1		gm		g2
 			 fxch		st(2)			            ;	t_dy*g1	x_2		t_dy*gm	g1		gm		g2
 
 			fadd		[eax]._x					;	x_1		x_2		t_dy*gm	g1		gm		g2
 			 fxch		st(3)						;	g1		x_2		t_dy*gm	x_1		gm		g2
-													
+
 			fadd		fp_conv_d16		            ;	g1+C	x_2		t_dy*gm	x_1		gm		g2
 			 fxch		st(2)			            ;	t_dy*gm	x_2		g1+C	x_1		gm		g2
-													
+
 			fadd		[eax]._x					;	x_m		x_2		g1+C	x_1		gm		g2
 			 fxch		st(4)			            ;	gm		x_2		g1+C	x_1		x_m		g2
 
 			fadd		fp_conv_d16					;	gm+C	x_2		g1+C	x_1		x_m		g2
 			 fxch		st(1)						;	x_2		gm+C	g1+C	x_1		x_m		g2
-													
+
 			fadd	xconv_d16_12[esi*8]	            ;	x_2+C	gm+C	g1+C	x_1		x_m		g2
 			 fxch		st(5)			            ;	g2		gm+C	g1+C	x_1		x_m		x_2+C
-													
+
 			fadd		fp_conv_d16					;	g2+C	gm+C	g1+C	x_1		x_m		x_2+C
 			 fxch		st(2)			            ;	g1+C	gm+C	g2+C	x_1		x_m		x_2+C
 
 			fstp real8 ptr [workspace].x1			;	gm+C	g2+C	x_1		x_m		x_2+C
 			fstp real8 ptr [workspace].xm			;	g2+C	x_1		x_m		x_2+C
 			fstp real8 ptr [workspace].x2			;	x_1		x_m		x_2+C
-											        
+
 			fadd	xconv_d16_12[esi*8]		        ;	x_1+C	x_m		x_2+C
 			fxch		st(1)						;	x_m		x_1+C	x_2+C
-													
+
 			fadd	xconv_d16_m[esi*8]		        ;	x_m+C	x_1+C	x_2+C
 
 
@@ -1068,13 +1068,13 @@ count_cont:
 
 			mov			edi,[workspace].x2	; read fixed d_x2
 			mov		ebx,[workspace.v0]				; Start preparing for parmeter setup
-		
+
 			fstp real8 ptr [workspace].xm			;	x_1+C	x_2+C
 			fstp real8 ptr [workspace].x1			;	x_2+C
 
 			mov			ecx,[workspace].xm
 			mov			[workspace].xm+4,edx
-			
+
 			mov			[workspace].x1+4,esi
 			and			ecx,0ffff0000h
 
@@ -1142,9 +1142,9 @@ top_zero:
 
 			fld			fp_one						;	1.0		1/2area	dy1*a	dy2		dx1		dx2
 			 fxch	   st(3)		    			;   dy2  	1/2area	dy1*a	1.0		dx1		dx2
-													
+
 			fmul		st,st(1)		            ;	dy2*a  	1/2area	dy1*a	1.0		dx1		dx2
-										            
+
 			fld			[edx]._y					;   sy3	 dy2*a  	1/2area	dy1*a	1.0		dx1		dx2
 			fsub		[ebx]._y					;   dsy2	dy2*a  	1/2area	dy1*a	1.0		dx1		dx2
 			 fxch	   st(5)		                ;   dx1	  dy2*a 	1/2area	dy1*a	1.0		dsy2	dx2
@@ -1154,11 +1154,11 @@ top_zero:
 bottom_zero:
 													;	0		1		2		3		4		5		6		7
 			fmul		st(1),st					;	1/2area	dy1*a	dy2		dx1		dx2
-													
+
 			fld			[ebx]._y		            ;	sy2		1/2area	dy1*a	dy2		dx1		dx2
 			fsub		[eax]._y		            ;   dsy1	1/2area	dy1*a	dy2		dx1		dx2
 			 fxch	   st(3)		    			;   dy2  	1/2area	dy1*a	dsy1	dx1		dx2
-													
+
 			fmul		st,st(1)		            ;	dy2*a  	1/2area	dy1*a	dsy1	dx1		dx2
 
 			fld			fp_one						;   1.0	 dy2*a  	1/2area	dy1*a	dsy1	dx1		dx2
@@ -1186,7 +1186,7 @@ endm
 
 
 
-; macros to extract the colour index for the flat shaders. 
+; macros to extract the colour index for the flat shaders.
 
 SETUP_FLOAT_COLOUR_SHADETABLE macro
 	fld dword ptr [eax+4*C_I]
@@ -1358,7 +1358,7 @@ REMOVE_INTEGER_PARTS_OF_PARAMETERS macro
 	REMOVE_INTEGER_PARTS_OF_PARAM workspace.d_v_y_1
 endm
 
- 
+
 
 MULTIPLY_UP_PARAM_VALUES macro param,dimension,magic ;24 cycles
 ;										st(0)		st(1)		st(2)		st(3)		st(4)		st(5)		st(6)		st(7)
@@ -1388,7 +1388,7 @@ MULTIPLY_UP_PARAM_VALUES macro param,dimension,magic ;24 cycles
 	fstp qword ptr workspaceA.s&param		;	dpdxdx		dpdy1dx		dpdy0dx
 	fstp qword ptr workspaceA.d&param&x	;	dpdy1dx		dpdy0dx
 	fstp qword ptr workspaceA.d&param&y1	;	dpdy0dx
-	fstp qword ptr workspaceA.d&param&y0	;	
+	fstp qword ptr workspaceA.d&param&y0	;
 endm
 
 
@@ -1625,7 +1625,7 @@ TriangleSetup_ZT_FLAT_LIT proc
 			ret
 TriangleSetup_ZT_FLAT_LIT endp
 
-TriangleSetup_ZT_ARBITRARY proc
+TriangleSetup_ZT_ARBITRARY proc (v0, v1, v2)
 			SETUP_FLOAT
 			SETUP_FLOAT_PARAM C_SZ,_z,workspace.s_z,workspace.d_z_x,fp_conv_d16,1
 			SETUP_FLOAT_PARAM C_U,_u,workspace.s_u,workspace.d_u_x,fp_conv_d24
@@ -2110,7 +2110,7 @@ fp_extended_cw	word	137fh,0
 fpu_cw	dw		FPU_CW_IC_AFFINE+FPU_CW_RC_CHOP+FPU_CW_PC_DOUBLE+FPU_CW_MASK_ALL
 old_fpu_cw dw ?
 
-align 8 
+align 8
 temporary_intensity qword ?
 
 
@@ -2143,4 +2143,3 @@ flip_table		dword	000000000h		;000
 				dword	080000000h		;111
 
 end
-										 

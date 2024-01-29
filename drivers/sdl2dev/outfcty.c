@@ -248,7 +248,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, validSource)(br_output_
     return BRE_OK;
 }
 
-#define DEFAULT_WINDOW_TITLE "BRender Application"
+#define DEFAULT_WINDOW_TITLE "BRender v1.3.2"
 
 /*
  * Instantiate an output pixelmap from the output type
