@@ -288,9 +288,7 @@ void SURFACE_CALL SurfaceLinearDepth(br_renderer *self, br_vector3 *p, br_vector
 /*
  * faceops.c
  */
-void BR_ASM_CALL OpTriangleClip(struct brp_block *block, union brp_vertex *v0, union brp_vertex *v1,
-                                union brp_vertex *v2, br_uint_16 (*fp_vertices)[3], br_uint_16 (*fp_edges)[3],
-                                br_vector4 *fp_eqn, struct temp_face *tfp);
+void BR_ASM_CALL OpTriangleClip(struct brp_block *block, ...);
 void BR_ASM_CALL OpTriangleClipConstantSurf(struct brp_block *block, union brp_vertex *v0, union brp_vertex *v1,
                                             union brp_vertex *v2, br_uint_16 (*fp_vertices)[3],
                                             br_uint_16 (*fp_edges)[3], br_vector4 *fp_eqn, struct temp_face *tfp);

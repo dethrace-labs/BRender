@@ -127,7 +127,7 @@ int main(int argc, char **argv)
 
     cube         = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
     cube->t.type = BR_TRANSFORM_MATRIX34;
-    cube->model  = BrModelFind("/opt/CARMA/DATA/MODELS/EAGLE.DAT");
+    cube->model  = BrModelFind("/Users/jeff/code/CrocDE-BRender/examples/dat/cube.dat");
 
     br_pixelmap *pm = BrPixelmapLoad("/Users/jeff/code/CrocDE-BRender/examples/dat/checkerboard8.pix");
     BrMapAdd(pm);
@@ -143,7 +143,7 @@ int main(int argc, char **argv)
     cube->material->flags |= BR_MATF_SMOOTH; // Makes lighting look _much_ better.
     // cube->material->flags |= BR_MATF_DISABLE_COLOUR_KEY;  // Not supported by software.
     // cube->material->opacity = 255; // < 255 selects screendoor renderer
-    cube->render_style = BR_RSTYLE_EDGES;
+    // cube->render_style = BR_RSTYLE_EDGES;
 
     BrMapUpdate(cube->material->colour_map, BR_MAPU_ALL);
     BrMaterialUpdate(cube->material, BR_MATU_ALL);

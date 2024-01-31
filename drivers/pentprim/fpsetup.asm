@@ -329,7 +329,7 @@ endif
 SETUP_FLOAT macro
 	local count_cont,exit,top_zero,bottom_zero,empty_triangle
 
-		assume eax: ptr brp_vertex, ebx: ptr brp_vertex, ecx: ptr brp_vertex, edx: ptr brp_vertex
+		assume eax: ptr brp_vertex, /*ebx: ptr brp_vertex*/, ecx: ptr brp_vertex, edx: ptr brp_vertex
 
 		; Calculate area of triangle and generate dx1/2area, dx1/2area, dx1/2area and dx1/2area
 		;

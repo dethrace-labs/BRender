@@ -21,15 +21,31 @@ BR_RCS_ID("$Id: faceops.c 1.4 1998/07/27 14:55:50 jon Exp $");
 /*
  * Clip a triangle
  */
-void BR_ASM_CALL OpTriangleClip(struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
-                                br_uint_16 (*fp_vertices)[3], br_uint_16 (*fp_edges)[3], br_vector4 *fp_eqn,
-                                struct temp_face *tfp)
+void BR_ASM_CALL OpTriangleClip(struct brp_block *block, ...)
 {
     brp_vertex  clip_in[3];
     int         nclipped;
     brp_vertex *clipped;
 
-    BrFailure("Not implemented: %s:%d", __FILE__, __LINE__);
+    brp_vertex *v0;
+    brp_vertex *v1;
+    brp_vertex *v2;
+    br_uint_16(*fp_vertices)[3];
+    br_uint_16(*fp_edges)[3];
+    br_vector4       *fp_eqn;
+    struct temp_face *tfp;
+
+    va_list va;
+
+    va_start(va, block);
+    v0          = va_arg(va, brp_vertex *);
+    v1          = va_arg(va, brp_vertex *);
+    v2          = va_arg(va, brp_vertex *);
+    fp_vertices = va_arg(va, br_uint_16(*)[3]);
+    fp_edges    = va_arg(va, br_uint_16(*)[3]);
+    fp_eqn      = va_arg(va, br_vector4 *);
+    tfp         = va_arg(va, struct temp_face *);
+    va_end(va);
 
     clip_in[0] = *v0;
     clip_in[1] = *v1;

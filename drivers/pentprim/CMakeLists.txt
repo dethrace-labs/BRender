@@ -186,6 +186,10 @@ add_library(pentprim
 		safediv.c
 		t_piza.c
 		ti8_piz.c
+		x86emu.c
+
+		fpsetup.c
+		zb8awtm.c
 
 		#"${CMAKE_CURRENT_BINARY_DIR}/drv.inc"
 
