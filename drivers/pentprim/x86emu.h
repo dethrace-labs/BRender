@@ -28,10 +28,10 @@ typedef struct x86_reg {
 } x86_reg;
 
 typedef union x86_mem {
-    uint32_t      uint_val;
-    float         float_val;
-    void         *ptr_val;
-    unsigned char bytes[8];
+    // uint32_t      uint_val;
+    // float         float_val;
+    void *ptr_val;
+    // unsigned char bytes[8];
 
 } x86_mem;
 

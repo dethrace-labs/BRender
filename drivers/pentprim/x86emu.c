@@ -58,8 +58,8 @@ x86_operand x86_op_reg(x86_reg *r)
 x86_operand x86_op_mem32(void *bytes)
 {
     x86_operand o;
-    o.type = X86_OP_MEM32;
-    memcpy(o.mem.bytes, bytes, 4);
+    o.type        = X86_OP_MEM32;
+    o.mem.ptr_val = bytes;
     return o;
 }
 
@@ -151,7 +151,7 @@ void mov(x86_operand dest, x86_operand src)
     int      size;
     switch(src.type) {
         case X86_OP_MEM32:
-            src_val = src.mem.bytes;
+            src_val = src.mem.ptr_val;
             size    = 4;
             break;
         case X86_OP_REG:
@@ -159,7 +159,7 @@ void mov(x86_operand dest, x86_operand src)
             size    = 4;
             break;
         case X86_OP_PTR:
-            src_val = &src.ptr;
+            src_val = src.ptr;
             size    = 8; // TODO
             break;
         default:
@@ -171,7 +171,8 @@ void mov(x86_operand dest, x86_operand src)
             memcpy(dest.reg->bytes, src_val, size);
             break;
         case X86_OP_MEM32:
-            fail();
+            memcpy(dest.mem.ptr_val, src_val, size);
+            break;
     }
 }
 
@@ -181,7 +182,7 @@ void xor_(x86_operand dest, x86_operand src)
     int      size;
     switch(src.type) {
         case X86_OP_MEM32:
-            src_val = src.mem.bytes;
+            src_val = src.mem.ptr_val;
             size    = 4;
             break;
         case X86_OP_REG:
@@ -209,7 +210,7 @@ void cmp(x86_operand dest, x86_operand src)
     int      size;
     switch(src.type) {
         case X86_OP_MEM32:
-            src_val = src.mem.bytes;
+            src_val = src.mem.ptr_val;
             size    = 4;
             break;
         case X86_OP_REG:

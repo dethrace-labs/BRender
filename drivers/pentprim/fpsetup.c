@@ -93,11 +93,10 @@ void SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
     mov(x86_op_reg(esi), x86_op_mem32(&flip_table[ebx->uint_val]));
     mov(x86_op_reg(ebx), x86_op_mem32(&sort_table_1[ebx->uint_val]));
 
-    mov(x86_op_reg(eax), x86_op_ptr(workspace.v0_array[eax->uint_val]));
-    mov(x86_op_reg(edx), x86_op_ptr(workspace.v0_array[edx->uint_val]));
-    mov(x86_op_reg(ebx), x86_op_ptr(workspace.v0_array[ebx->uint_val]));
+    mov(x86_op_reg(eax), x86_op_ptr(&workspace.v0_array[eax->uint_val]));
+    mov(x86_op_reg(edx), x86_op_ptr(&workspace.v0_array[edx->uint_val]));
+    mov(x86_op_reg(ebx), x86_op_ptr(&workspace.v0_array[ebx->uint_val]));
 
-    workspace.flip = 10;
     mov(x86_op_mem32(&workspace.flip), x86_op_reg(esi));
     int a = 0;
 }
