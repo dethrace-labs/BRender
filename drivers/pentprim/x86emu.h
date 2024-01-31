@@ -8,7 +8,8 @@
 enum X86_OP {
     X86_OP_REG,
     X86_OP_MEM32,
-    X86_OP_PTR
+    X86_OP_PTR,
+    X86_OP_IMM
 };
 
 enum {
@@ -40,6 +41,7 @@ typedef struct x86_operand {
         x86_reg *reg;
         x86_mem  mem;
         void    *ptr;
+        uint32_t imm;
     };
     char type;
 } x86_operand;
@@ -59,8 +61,9 @@ x87_operand x87_op_i(int i);
 x86_operand x86_op_reg(x86_reg *r);
 x86_operand x86_op_mem32(void *bytes);
 x86_operand x86_op_ptr(void *ptr);
+x86_operand x86_op_imm(uint32_t imm);
 
-extern x86_reg *eax, *ebx, *ecx, *edx, *esi;
+extern x86_reg *eax, *ebx, *ecx, *edx, *esi, *ebp;
 void            x86emu_init();
 
 void fld(x87_operand op);
@@ -75,5 +78,9 @@ void mov(x86_operand dest, x86_operand src);
 void xor_(x86_operand dest, x86_operand src);
 void cmp(x86_operand dest, x86_operand src);
 void rcl(x86_operand dest, int count);
+void sub(x86_operand dest, x86_operand src);
+void and (x86_operand dest, x86_operand src);
+void or (x86_operand dest, x86_operand src);
+void shr(x86_operand dest, int count);
 
 #endif

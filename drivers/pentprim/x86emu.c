@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
 double fpu_stack[8];
 int    fpu_st0_ptr = -1;
@@ -9,7 +10,7 @@ int    ZF          = 0;
 int    CF          = 0;
 int    SF          = 0;
 
-x86_reg *eax, *ebx, *ecx, *edx, *esi;
+x86_reg *eax, *ebx, *ecx, *edx, *esi, *ebp;
 
 #define ST_(i) fpu_stack[fpu_st0_ptr - i]
 
@@ -25,6 +26,7 @@ void x86emu_init()
     ecx = malloc(sizeof(x86_reg));
     edx = malloc(sizeof(x86_reg));
     esi = malloc(sizeof(x86_reg));
+    ebp = malloc(sizeof(x86_reg));
 }
 void fail()
 {
@@ -52,6 +54,14 @@ x86_operand x86_op_reg(x86_reg *r)
     x86_operand o;
     o.type = X86_OP_REG;
     o.reg  = r;
+    return o;
+}
+
+x86_operand x86_op_imm(uint32_t imm)
+{
+    x86_operand o;
+    o.type = X86_OP_IMM;
+    o.imm  = imm;
     return o;
 }
 
@@ -162,6 +172,9 @@ void mov(x86_operand dest, x86_operand src)
             src_val = src.ptr;
             size    = 8; // TODO
             break;
+        case X86_OP_IMM:
+            src_val = &src.imm;
+            break;
         default:
             fail();
     }
@@ -223,11 +236,11 @@ void cmp(x86_operand dest, x86_operand src)
 
     switch(dest.type) {
         case X86_OP_REG:
-            if(dest.reg->uint_val < src.reg->uint_val) {
+            if(dest.reg->uint_val < *(uint32_t *)src_val) {
                 CF = 1;
                 ZF = 0;
                 SF = 1;
-            } else if(dest.reg->uint_val == src.reg->uint_val) {
+            } else if(dest.reg->uint_val == *(uint32_t *)src_val) {
                 CF = 0;
                 ZF = 1;
             } else {
@@ -255,5 +268,97 @@ void rcl(x86_operand dest, int count)
             break;
         default:
             fail();
+    }
+}
+
+void sub(x86_operand dest, x86_operand src)
+{
+    void *src_val;
+    int   size;
+    switch(src.type) {
+        case X86_OP_MEM32:
+            src_val = src.mem.ptr_val;
+            size    = 4;
+            break;
+        case X86_OP_REG:
+            src_val = src.reg->bytes;
+            size    = 4;
+            break;
+        default:
+            fail();
+    }
+    switch(dest.type) {
+        case X86_OP_REG:
+            dest.reg->uint_val -= *(uint32_t *)src_val;
+            break;
+        default:
+            fail();
+    }
+}
+
+void and (x86_operand dest, x86_operand src)
+{
+    void *src_val;
+    int   size;
+    switch(src.type) {
+        case X86_OP_MEM32:
+            src_val = src.mem.ptr_val;
+            size    = 4;
+            break;
+        case X86_OP_REG:
+            src_val = src.reg->bytes;
+            size    = 4;
+            break;
+        case X86_OP_IMM:
+            src_val = &src.imm;
+            break;
+        default:
+            fail();
+    }
+    switch(dest.type) {
+        case X86_OP_REG:
+            dest.reg->uint_val &= *(uint32_t *)src_val;
+            break;
+        default:
+            fail();
+    }
+}
+
+void or (x86_operand dest, x86_operand src)
+{
+    void *src_val;
+    int   size;
+    switch(src.type) {
+        case X86_OP_MEM32:
+            src_val = src.mem.ptr_val;
+            size    = 4;
+            break;
+        case X86_OP_REG:
+            src_val = src.reg->bytes;
+            size    = 4;
+            break;
+        case X86_OP_IMM:
+            src_val = &src.imm;
+            break;
+        default:
+            fail();
+    }
+    switch(dest.type) {
+        case X86_OP_REG:
+            dest.reg->uint_val |= *(uint32_t *)src_val;
+            break;
+        default:
+            fail();
+    }
+}
+
+void shr(x86_operand dest, int count)
+{
+    assert(dest.type == X86_OP_REG);
+
+    while(count != 0) {
+        CF = dest.reg->uint_val & 1;
+        dest.reg->uint_val /= 2; // Unsigned divide
+        count--;
     }
 }

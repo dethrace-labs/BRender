@@ -23,6 +23,10 @@ int      sort_table_2[] = {2, 1, 0, 1, 2, 0, 0, 0};
 uint32_t flip_table[8]  = {0x000000000, 0x080000000, 0x080000000, 0x000000000,
                            0x080000000, 0x000000000, 0x000000000, 0x080000000};
 
+#define MASK_MANTISSA   0x007fffff
+#define IMPLICIT_ONE    1 << 23
+#define EXPONENT_OFFSET ((127 + 23) << 23) | 0x07fffff
+
 struct workspace_t workspace;
 
 void TriangleSetup_ZT_ARBITRARY(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
@@ -93,10 +97,24 @@ void SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
     mov(x86_op_reg(esi), x86_op_mem32(&flip_table[ebx->uint_val]));
     mov(x86_op_reg(ebx), x86_op_mem32(&sort_table_1[ebx->uint_val]));
 
+    // Load eax,ebx,edx with pointers to the three vertices in vertical order
     mov(x86_op_reg(eax), x86_op_ptr(&workspace.v0_array[eax->uint_val]));
     mov(x86_op_reg(edx), x86_op_ptr(&workspace.v0_array[edx->uint_val]));
     mov(x86_op_reg(ebx), x86_op_ptr(&workspace.v0_array[ebx->uint_val]));
 
     mov(x86_op_mem32(&workspace.flip), x86_op_reg(esi));
+
+    mov(x86_op_reg(ebp), x86_op_mem32(&((brp_vertex *)eax->ptr_val)->comp_f[C_SY]));
+    mov(x86_op_reg(ecx), x86_op_imm(EXPONENT_OFFSET));
+
+    sub(x86_op_reg(ecx), x86_op_reg(ebp));           // Offset exponent to get shift value
+    and(x86_op_reg(ebp), x86_op_imm(MASK_MANTISSA)); // Mask out mantissa
+
+    shr(x86_op_reg(ecx), 23);                       //				; Move shift value to low bits
+    or (x86_op_reg(ebp), x86_op_imm(IMPLICIT_ONE)); //	; Put the 1 back in top of mantissa
+
+    // shr		 ebp,cl				; EBP = y_t
+    shr(x86_op_reg(ebp), ecx->uint_val & 0xff);
+
     int a = 0;
 }
