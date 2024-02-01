@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#define st
-
 enum X86_OP {
     X86_OP_REG,
     X86_OP_MEM32,
@@ -16,11 +14,14 @@ enum {
     X87_OP_FLOAT,
     X87_OP_DOUBLE,
     X87_OP_ST,
+    X87_OP_MEM32,
+    X87_OP_MEM64
 };
 
 typedef struct x86_reg {
     union {
         uint32_t      uint_val;
+        int32_t       int_val;
         float         float_val;
         unsigned char bytes[8];
         void         *ptr_val;
@@ -51,28 +52,41 @@ typedef struct x87_operand {
         float         float_val;
         double        double_val;
         int           st_index;
+        void         *mem;
         unsigned char bytes[8];
     };
     char type;
 } x87_operand;
 
 x87_operand x87_op_f(float f);
+x87_operand x87_op_d(double d);
 x87_operand x87_op_i(int i);
+x87_operand x87_op_mem32(void *ptr);
+x87_operand x87_op_mem64(void *ptr);
 x86_operand x86_op_reg(x86_reg *r);
 x86_operand x86_op_mem32(void *bytes);
 x86_operand x86_op_ptr(void *ptr);
 x86_operand x86_op_imm(uint32_t imm);
 
-extern x86_reg *eax, *ebx, *ecx, *edx, *esi, *ebp;
+extern x86_reg *eax, *ebx, *ecx, *edx, *esi, *ebp, *edi;
 void            x86emu_init();
 
+int  x86emu_fpu_stack_top();
 void fld(x87_operand op);
+void fild(int val);
 void fsub(float val);
+void fadd(x87_operand op);
+void faddp(x87_operand op);
 void fsub_2(x87_operand dest, x87_operand src);
 void fsubp_2(x87_operand dest, x87_operand src);
 void fmul(float);
 void fmul_2(x87_operand dest, x87_operand src);
+void fmulp_2(x87_operand dest, x87_operand src);
 void fdivr(float f);
+void fdivrp(int dest, int src);
+void fxch(int i);
+void fst(x87_operand dest);
+void fstp(x87_operand dest);
 
 void mov(x86_operand dest, x86_operand src);
 void xor_(x86_operand dest, x86_operand src);
@@ -82,5 +96,6 @@ void sub(x86_operand dest, x86_operand src);
 void and (x86_operand dest, x86_operand src);
 void or (x86_operand dest, x86_operand src);
 void shr(x86_operand dest, int count);
+void sar(x86_operand dest, int count);
 
 #endif

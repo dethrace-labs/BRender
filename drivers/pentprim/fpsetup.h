@@ -131,6 +131,9 @@ struct workspace_t {
     uint32_t     scratch15;
 } workspace_t;
 
+#define m_y        workspace.t_dy
+#define sort_value workspace.top_vertex
+
 struct ArbitraryWidthWorkspace_t {
     uint32_t su;
     uint32_t pad0;
@@ -291,5 +294,6 @@ typedef struct workspace_t {
 
 void TriangleSetup_ZT_ARBITRARY(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2);
 void SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2);
+void SETUP_FLOAT_PARAM(int comp, char *param /*unused*/, uint32_t *s_p, uint32_t *d_p_x, float conv, int is_unsigned);
 
 #endif
