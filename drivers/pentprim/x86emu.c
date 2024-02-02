@@ -52,6 +52,7 @@ void fail()
 
 void fpu_pop()
 {
+    fpu_stack[fpu_st0_ptr] = 0;
     fpu_st0_ptr--;
     assert(fpu_st0_ptr >= -1);
 }
@@ -182,9 +183,9 @@ void fild(int val)
     assert(fpu_st0_ptr < 7);
 }
 
-void fild_ptr(void *val)
+void fild_ptr(intptr_t val)
 {
-    fpu_stack[fpu_st0_ptr + 1] = *(double *)val;
+    fpu_stack[fpu_st0_ptr + 1] = val;
     fpu_st0_ptr++;
     assert(fpu_st0_ptr < 7);
 }
@@ -306,6 +307,7 @@ void mov(x86_operand dest, x86_operand src)
             break;
         case X86_OP_IMM:
             src_val = &src.imm;
+            size    = 4;
             break;
         default:
             fail();
@@ -466,11 +468,9 @@ void and (x86_operand dest, x86_operand src)
 void add(x86_operand dest, x86_operand src)
 {
     void *src_val;
-    int   size;
     switch(src.type) {
         case X86_OP_MEM32:
             src_val = src.mem.ptr_val;
-            size    = 4;
             break;
         case X86_OP_IMM:
             src_val = &src.imm;
@@ -490,15 +490,12 @@ void add(x86_operand dest, x86_operand src)
 void or (x86_operand dest, x86_operand src)
 {
     void *src_val;
-    int   size;
     switch(src.type) {
         case X86_OP_MEM32:
             src_val = src.mem.ptr_val;
-            size    = 4;
             break;
         case X86_OP_REG:
             src_val = src.reg->bytes;
-            size    = 4;
             break;
         case X86_OP_IMM:
             src_val = &src.imm;

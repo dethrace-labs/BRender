@@ -100,4 +100,7 @@ void shr(x86_operand dest, int count);
 void sar(x86_operand dest, int count);
 void shl(x86_operand dest, int count);
 
+// hack
+void fild_ptr(intptr_t val);
+
 #endif

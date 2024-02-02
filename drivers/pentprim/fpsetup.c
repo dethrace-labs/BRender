@@ -6,15 +6,17 @@
 #include <assert.h>
 #include <stdio.h>
 
-double fconv_d16_12[2] = {0x04238000000000000, 0x04238000000010000};
-double fconv_d16_m[2]  = {0x04238000000010000, 0x04238000000000000};
-float  fp_one          = 1.0f;
-float  fp_conv_d       = 6.7553994e15;
-float  fp_conv_d8      = 2.6388279e13;
-float  fp_conv_d8r     = 1.7293823e18;
-float  fp_conv_d16     = 1.0307922e11;
-float  fp_conv_d24     = 4.0265318e8;
-float  fp_conv_d32     = 1572864.0;
+double  fconv_d16_12[2] = {1.03079215104e11, 1.03079215105e11};
+double  fconv_d16_m[2]  = {1.03079215105e11, 1.03079215104e11};
+float   fp_one          = 1.0f;
+float   fp_two          = 2.0f;
+float   fp_conv_d       = 6.7553994e15; // 0x59C00000;
+int32_t fp_conv_d2      = (127 + 52 - 0) << 23 + (1 >> 22);
+float   fp_conv_d8      = 2.6388279e13;
+float   fp_conv_d8r     = 1.7293823e18;
+float   fp_conv_d16     = 1.0307922e11;
+float   fp_conv_d24     = 4.0265318e8;
+float   fp_conv_d32     = 1572864.0;
 
 uint16_t fp_single_cw   = 0x107f;
 uint16_t fp_double_cw   = 0x127f;
@@ -107,9 +109,10 @@ void SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
     mov(x86_op_reg(eax), x86_op_ptr(&workspace.v0_array[eax->uint_val]));
     mov(x86_op_reg(edx), x86_op_ptr(&workspace.v0_array[edx->uint_val]));
     mov(x86_op_reg(ebx), x86_op_ptr(&workspace.v0_array[ebx->uint_val]));
-
     mov(x86_op_mem32(&workspace.flip), x86_op_reg(esi));
 
+    // Work out Y extents of triangle
+    // ; Convert float to int using integer instructions, because FPU is in use doing division
     mov(x86_op_reg(ebp), x86_op_mem32(&((brp_vertex *)eax->ptr_val)->comp_f[C_SY]));
     mov(x86_op_reg(ecx), x86_op_imm(EXPONENT_OFFSET));
 
@@ -140,7 +143,7 @@ void SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
 
     shr(x86_op_reg(ecx), 23);                       //				; Move shift value to low bits
     or (x86_op_reg(edi), x86_op_imm(IMPLICIT_ONE)); //	; Put the 1 back in top of mantissa
-    // shr		 ebp,cl				; edi = y_b
+    // shr		 edi,cl				; edi = y_b
     shr(x86_op_reg(edi), ecx->uint_val & 0xff);
 
     // Catch special cases of empty top or bottom trapezoids

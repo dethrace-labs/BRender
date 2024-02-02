@@ -7,6 +7,11 @@
 
 extern struct workspace_t               workspace;
 extern struct ArbitraryWidthWorkspace_t workspaceA;
+extern float                            fp_one;
+extern float                            fp_two;
+extern float                            fp_conv_d;
+extern int32_t                          fp_conv_d2;
+;
 
 typedef struct counts_tag_t {
     union {
@@ -56,7 +61,7 @@ struct workspace_t {
     uint32_t d_s_x;
     uint32_t d_s_y_0;
 
-    char    *scanAddress;
+    uint32_t scanAddress;
     uint32_t scanAddressTrashed;
 
     char    *depthAddress;
