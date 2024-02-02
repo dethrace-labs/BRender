@@ -5,20 +5,8 @@
 #include "../softrend/ddi/priminfo.h"
 #include "x86emu.h"
 
-/*
-fp_one			dword	1.0
-fp_one_fixed	dword	65536.0
-fp_conv_d		dword	(127+52-0) << 23 + (1 << 22)
-fp_conv_d8		dword	(127+52-8) shl 23 + (1 shl 22)
-fp_conv_d8r		dword	(127+52+8) shl 23 + (1 shl 22)
-fp_conv_d16		dword	(127+52-16) shl 23 + (1 shl 22)
-fp_conv_d24		dword	(127+52-24) shl 23 + (1 shl 22)
-fp_conv_d32		dword	(127+52-32) shl 23 + (1 shl 22)
-
-fp_single_cw	word	107fh
-fp_double_cw	word	127fh
-fp_extended_cw	word	137fh,0
-*/
+extern struct workspace_t               workspace;
+extern struct ArbitraryWidthWorkspace_t workspaceA;
 
 typedef struct counts_tag_t {
     union {
@@ -147,9 +135,8 @@ struct ArbitraryWidthWorkspace_t {
     uint32_t duy0;
     uint32_t pad3;
 
-    uint32_t sv_setup; // added
     uint32_t pad10;
-    uint8_t *sv;
+    uint32_t sv;
     uint32_t pad4;
 
     uint32_t dvy1;
@@ -295,5 +282,15 @@ typedef struct workspace_t {
 void TriangleSetup_ZT_ARBITRARY(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2);
 void SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2);
 void SETUP_FLOAT_PARAM(int comp, char *param /*unused*/, uint32_t *s_p, uint32_t *d_p_x, float conv, int is_unsigned);
+void ARBITRARY_SETUP();
+void SETUP_FLAGS();
+void REMOVE_INTEGER_PARTS_OF_PARAMETERS();
+void REMOVE_INTEGER_PARTS_OF_PARAM(void *param);
+void MULTIPLY_UP_PARAM_VALUES(int32_t s_p, int32_t d_p_x, int32_t d_p_y_0, int32_t d_p_y_1, void *a_sp, void *a_dpx,
+                              void *a_dpy1, void *a_dpy0, uint32_t dimension, float magic);
+void SPLIT_INTO_INTEGER_AND_FRACTIONAL_PARTS();
+void MULTIPLY_UP_V_BY_STRIDE(float magic);
+void CREATE_CARRY_VERSIONS();
+void WRAP_SETUP();
 
 #endif

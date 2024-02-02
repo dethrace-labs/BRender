@@ -2,7 +2,9 @@
 #include "../softrend/ddi/priminfo.h"
 #include "x86emu.h"
 #include "fpsetup.h"
+#include "work.h"
 #include <assert.h>
+#include <stdio.h>
 
 double fconv_d16_12[2] = {0x04238000000000000, 0x04238000000010000};
 double fconv_d16_m[2]  = {0x04238000000010000, 0x04238000000000000};
@@ -28,15 +30,18 @@ uint32_t flip_table[8]  = {0x000000000, 0x080000000, 0x080000000, 0x000000000,
 #define IMPLICIT_ONE    1 << 23
 #define EXPONENT_OFFSET ((127 + 23) << 23) | 0x07fffff
 
-struct workspace_t workspace;
+float                            temp;
+struct workspace_t               workspace;
+struct ArbitraryWidthWorkspace_t workspaceA;
 
 void TriangleSetup_ZT_ARBITRARY(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
 {
+    printf("TriangleSetup_ZT_ARBITRARY\n");
     SETUP_FLOAT(v0, v1, v2);
     SETUP_FLOAT_PARAM(C_SZ, "_z", &workspace.s_z, &workspace.d_z_x, fp_conv_d16, 1);
-    // SETUP_FLOAT_PARAM C_U,_u,workspace.s_u,workspace.d_u_x,fp_conv_d24,0
-    // SETUP_FLOAT_PARAM C_V,_v,workspace.s_v,workspace.d_v_x,fp_conv_d24,0
-    // ARBITRARY_SETUP
+    SETUP_FLOAT_PARAM(C_U, "_u", &workspace.s_u, &workspace.d_u_x, fp_conv_d24, 0);
+    SETUP_FLOAT_PARAM(C_V, "_v", &workspace.s_v, &workspace.d_v_x, fp_conv_d24, 0);
+    ARBITRARY_SETUP();
 }
 
 void SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
@@ -670,4 +675,435 @@ void SETUP_FLOAT_PARAM(int comp, char *param /*unused*/, uint32_t *s_p, uint32_t
         mov(x86_op_mem32(s_p), x86_op_reg(esi));
         // endif
     }
+}
+
+void ARBITRARY_SETUP()
+{
+    // SETUP_FPU
+    SETUP_FLAGS();
+    REMOVE_INTEGER_PARTS_OF_PARAMETERS();
+
+    // param,dimension,magic
+    // MULTIPLY_UP_PARAM_VALUES(v, width_p, fp_conv_d8r);
+    MULTIPLY_UP_PARAM_VALUES(workspace.s_u, workspace.d_u_x, workspace.d_u_y_0, workspace.d_u_y_1, &workspaceA.su,
+                             &workspaceA.dux, &workspaceA.duy1, &workspaceA.duy0, work.texture.width_p, fp_conv_d8r);
+
+    // MULTIPLY_UP_PARAM_VALUES(v, height, fp_conv_d8r);
+    MULTIPLY_UP_PARAM_VALUES(workspace.s_v, workspace.d_v_x, workspace.d_v_y_0, workspace.d_v_y_1, &workspaceA.sv,
+                             &workspaceA.dvx, &workspaceA.dvy1, &workspaceA.dvy0, work.texture.height, fp_conv_d8r);
+
+    SPLIT_INTO_INTEGER_AND_FRACTIONAL_PARTS();
+    MULTIPLY_UP_V_BY_STRIDE(fp_conv_d);
+    CREATE_CARRY_VERSIONS();
+    WRAP_SETUP();
+    // RESTORE_FPU
+}
+
+// SETUP_FLAGS macro ; approx 21 cycles fixed, 45 cycles float
+void SETUP_FLAGS()
+{
+    // 	mov edx,workspace.v2
+    mov(x86_op_reg(edx), x86_op_ptr(&workspace.v2));
+    // 	mov eax,workspace.v0
+    mov(x86_op_reg(eax), x86_op_ptr(&workspace.v0));
+    // 	mov ecx,workspace.v1
+    mov(x86_op_reg(ecx), x86_op_ptr(&workspace.v1));
+    // 	mov esi,2
+    mov(x86_op_reg(esi), x86_op_imm(2));
+    // if BASED_FIXED
+    // 	mov ebx,dword ptr[edx+4*C_U]
+    // 	mov ebp,dword ptr[eax+4*C_U]
+    // 	mov edi,dword ptr[ecx+4*C_U]
+    // else
+    // 	fld dword ptr[edx+4*C_U]
+    fld(x87_op_f(((brp_vertex *)edx->ptr_val)->comp_f[C_U]));
+    // 	fadd fp_conv_d16
+    fadd(x87_op_f(fp_conv_d16));
+    // 	fld dword ptr[eax+4*C_U]
+    fld(x87_op_f(((brp_vertex *)eax->ptr_val)->comp_f[C_U]));
+    // 	fadd fp_conv_d16
+    fadd(x87_op_f(fp_conv_d16));
+    // 	fld dword ptr[ecx+4*C_U]
+    fld(x87_op_f(((brp_vertex *)ecx->ptr_val)->comp_f[C_U]));
+    // 	fadd fp_conv_d16
+    fadd(x87_op_f(fp_conv_d16));
+    // 	fld dword ptr[edx+4*C_V]
+    fld(x87_op_f(((brp_vertex *)edx->ptr_val)->comp_f[C_V]));
+    // 	fadd fp_conv_d16
+    fadd(x87_op_f(fp_conv_d16));
+    // 	fld dword ptr[eax+4*C_V]
+    fld(x87_op_f(((brp_vertex *)eax->ptr_val)->comp_f[C_V]));
+    // 	fadd fp_conv_d16
+    fadd(x87_op_f(fp_conv_d16));
+    // 	fld dword ptr[ecx+4*C_V]
+    fld(x87_op_f(((brp_vertex *)ecx->ptr_val)->comp_f[C_V]));
+    // 	fadd fp_conv_d16
+    fadd(x87_op_f(fp_conv_d16));
+    // 	 fxch st(2)
+    fxch(2);
+    // 	fstp qword ptr workspace.scratch0
+    fstp(x87_op_mem64(&workspace.scratch0));
+    // 	fstp qword ptr workspace.scratch2
+    fstp(x87_op_mem64(&workspace.scratch2));
+    // 	fstp qword ptr workspace.scratch4
+    fstp(x87_op_mem64(&workspace.scratch4));
+    // 	fstp qword ptr workspace.scratch6
+    fstp(x87_op_mem64(&workspace.scratch6));
+    // 	fstp qword ptr workspace.scratch8
+    fstp(x87_op_mem64(&workspace.scratch8));
+    // 	fstp qword ptr workspace.scratch10
+    fstp(x87_op_mem64(&workspace.scratch10));
+    // 	mov ebx,workspace.scratch6
+    mov(x86_op_reg(ebx), x86_op_mem32(&workspace.scratch6));
+    // 	mov ebp,workspace.scratch8
+    mov(x86_op_reg(ebp), x86_op_mem32(&workspace.scratch8));
+    // 	mov edi,workspace.scratch10
+    mov(x86_op_reg(edi), x86_op_mem32(&workspace.scratch10));
+    // endif
+    // 	and ebx,0ffff0000h
+    and(x86_op_reg(ebx), x86_op_imm(0xffff0000));
+    // 	and ebp,0ffff0000h
+    and(x86_op_reg(ebp), x86_op_imm(0xffff0000));
+    // 	and edi,0ffff0000h
+    and(x86_op_reg(edi), x86_op_imm(0xffff0000));
+    // 	cmp ebx,ebp
+    // 	jne wrapped
+    if(ebx->uint_val != ebp->uint_val) {
+        goto wrapped;
+    }
+    // 	cmp ebx,edi
+    // 	jne wrapped
+    if(ebx->uint_val != edi->uint_val) {
+        goto wrapped;
+    }
+    // if BASED_FIXED
+    // 	mov ebx,dword ptr[edx+4*C_V]
+    // 	mov ebp,dword ptr[eax+4*C_V]
+    // 	mov edi,dword ptr[ecx+4*C_V]
+    // else
+    // 	mov ebx,workspace.scratch0
+    mov(x86_op_reg(ebx), x86_op_mem32(&workspace.scratch0));
+    // 	mov ebp,workspace.scratch2
+    mov(x86_op_reg(ebp), x86_op_mem32(&workspace.scratch2));
+    // 	mov edi,workspace.scratch4
+    mov(x86_op_reg(edi), x86_op_mem32(&workspace.scratch4));
+    // endif
+    and(x86_op_reg(ebx), x86_op_imm(0xffff0000));
+    // 	and ebp,0ffff0000h
+    and(x86_op_reg(ebp), x86_op_imm(0xffff0000));
+    // 	and edi,0ffff0000h
+    and(x86_op_reg(edi), x86_op_imm(0xffff0000));
+    // 	cmp ebx,ebp
+    // 	jne wrapped
+    if(ebx->uint_val != ebp->uint_val) {
+        goto wrapped;
+    }
+    // 	cmp ebx,edi
+    // 	jne wrapped
+    if(ebx->uint_val != edi->uint_val) {
+        goto wrapped;
+    }
+
+    // 	mov esi,0
+    mov(x86_op_reg(esi), x86_op_imm(0));
+wrapped:
+    // 	mov eax,workspace.flip
+    mov(x86_op_reg(esi), x86_op_mem32(&workspace.flip));
+    // 	or eax,esi
+    or (x86_op_reg(eax), x86_op_reg(esi));
+    // 	mov workspaceA.flags,eax
+    mov(x86_op_mem32(&workspaceA.flags), x86_op_reg(eax));
+    // endm
+}
+
+void REMOVE_INTEGER_PARTS_OF_PARAMETERS()
+{
+    // ; assumes 8.24 format
+    // 	mov edi,0ffffffh
+    mov(x86_op_reg(edi), x86_op_imm(0xffffff));
+    // 	mov esi,0ff000000h
+    mov(x86_op_reg(esi), x86_op_imm(0xff000000));
+    // 	and workspace.s_u,0ffffffh
+    and(x86_op_mem32(&workspace.s_u), x86_op_imm(0xffffff));
+    // 	and workspace.s_v,0ffffffh
+    and(x86_op_mem32(&workspace.s_v), x86_op_imm(0xffffff));
+
+    REMOVE_INTEGER_PARTS_OF_PARAM(&workspace.d_u_x);
+    REMOVE_INTEGER_PARTS_OF_PARAM(&workspace.d_u_y_0);
+    REMOVE_INTEGER_PARTS_OF_PARAM(&workspace.d_u_y_1);
+
+    REMOVE_INTEGER_PARTS_OF_PARAM(&workspace.d_v_x);
+    REMOVE_INTEGER_PARTS_OF_PARAM(&workspace.d_v_y_0);
+    REMOVE_INTEGER_PARTS_OF_PARAM(&workspace.d_v_y_1);
+    // endm
+}
+
+void REMOVE_INTEGER_PARTS_OF_PARAM(void *param)
+{
+    // local paramNegative
+    // 	mov ebp,esi
+    mov(x86_op_reg(ebp), x86_op_reg(esi));
+    // 	mov eax,param
+    mov(x86_op_reg(ebp), x86_op_mem32(param));
+
+    // 	test eax,80000000h
+    // 	jnz paramNegative
+    if((eax->uint_val & 0x80000000) == 0) {
+        // zf = 1;
+    } else {
+        // zf = 0;
+        goto paramNegative;
+    }
+
+    // 	mov ebp,edi
+    mov(x86_op_reg(ebp), x86_op_reg(edi));
+
+    // 	and eax,ebp
+    and(x86_op_reg(eax), x86_op_reg(ebp));
+paramNegative:
+    // 	and ebp,esi
+    and(x86_op_reg(ebp), x86_op_reg(esi));
+
+    // 	or eax,ebp
+    or (x86_op_reg(eax), x86_op_reg(ebp));
+
+    // 	mov param,eax
+    mov(x86_op_mem32(param), x86_op_reg(eax));
+    // endm
+}
+
+// MULTIPLY_UP_PARAM_VALUES macro param,dimension,magic ;24 cycles
+void MULTIPLY_UP_PARAM_VALUES(int32_t s_p, int32_t d_p_x, int32_t d_p_y_0, int32_t d_p_y_1, void *a_sp, void *a_dpx,
+                              void *a_dpy1, void *a_dpy0, uint32_t dimension, float magic)
+{
+    // ;										st(0)		st(1)		st(2)		st(3)		st(4)		st(5) st(6) st(7)
+    assert(x86emu_fpu_stack_top() == -1);
+
+    // fild work.texture.dimension;         d
+    fild(dimension);
+    // 	fild workspace.s_&param			;	sp			d
+    fild(s_p);
+    // 	fild workspace.d_&param&_x		;	dpdx		sp			d
+    fild(d_p_x);
+    // 	fild workspace.d_&param&_y_0	;	dpdy0		dpdx		sp			d
+    fild(d_p_y_0);
+    // 	fxch st(2)						;	sp			dpdx		dpdy0		d
+    fxch(2);
+    // 	fmul st,st(3)					;	spd			dpdx		dpdy0		d
+    fmul_2(x87_op_i(0), x87_op_i(3));
+    // 	fild workspace.d_&param&_y_1	;	dpdy1		spd			dpdx		dpdy0		d
+    fild(d_p_y_1);
+    // 	fxch st(2)						;	dpdx		spd			dpdy1		dpdy0		d
+    fxch(2);
+    // 	fmul st,st(4)					;	dpdxd		spd			dpdy1		dpdy0		d
+    fmul_2(x87_op_i(0), x87_op_i(4));
+    // 	 fxch st(1)						;	spd			dpdxd		dpdy1		dpdy0		d
+    fxch(1);
+    // 	fadd magic						;	spdx		dpdxd		dpdy1		dpdy0		d
+    fadd(x87_op_f(magic));
+    // 	 fxch st(3)						;	dpdy0		dpdxd		dpdy1		spdx		d
+    fxch(3);
+    // 	fmul st,st(4)					;	dpdy0d		dpdxd		dpdy1		spdx		d
+    fmul_2(x87_op_i(0), x87_op_i(4));
+    // 	 fxch st(1)						;	dpdxd		dpdy0d		dpdy1		spdx		d
+    fxch(1);
+    // 	fadd magic						;	dpdxdx		dpdy0d		dpdy1		spdx		d
+    fadd(x87_op_f(magic));
+    // 	 fxch st(2)						;	dpdy1		dpdy0d		dpdxdx		spdx		d
+    fxch(2);
+    // 	fmul st,st(4)					;	dpdy1d		dpdy0d		dpdxdx		spdx		d
+    fmul_2(x87_op_i(0), x87_op_i(4));
+    // 	 fxch st(4)						;	d			dpdy0d		dpdxdx		spdx		dpdy1d
+    fxch(4);
+    // 	fstp st(0)						;	dpdy0d		dpdxdx		spdx		dpdy1d
+    fstp(x87_op_i(0));
+    // 	fadd magic						;	dpdy0dx		dpdxdx		spdx		dpdy1d
+    fadd(x87_op_f(magic));
+    // 	 fxch st(3)						;	dpdy1d		dpdxdx		spdx		dpdy0dx
+    fxch(3);
+    // 	fadd magic						;	dpdy1dx		dpdxdx		spdx		dpdy0dx
+    fadd(x87_op_f(magic));
+    // 	 fxch st(2)						;	spdx		dpdxdx		dpdy1dx		dpdy0dx
+    fxch(2);
+    // 	fstp qword ptr workspaceA.s&param		;	dpdxdx		dpdy1dx		dpdy0dx
+    fstp(x87_op_mem64(a_sp));
+    // 	fstp qword ptr workspaceA.d&param&x	;	dpdy1dx		dpdy0dx
+    fstp(x87_op_mem64(a_dpx));
+    // 	fstp qword ptr workspaceA.d&param&y1	;	dpdy0dx
+    fstp(x87_op_mem64(a_dpy1));
+    // 	fstp qword ptr workspaceA.d&param&y0	;
+    fstp(x87_op_mem64(a_dpy0));
+    // endm
+}
+
+// SPLIT_INTO_INTEGER_AND_FRACTIONAL_PARTS macro ; 24 cycles
+void SPLIT_INTO_INTEGER_AND_FRACTIONAL_PARTS()
+{
+    // 	mov ebx,workspaceA.sv
+    mov(x86_op_reg(ebx), x86_op_mem32(&workspaceA.sv));
+
+    // 	shl ebx,16
+    shl(x86_op_reg(ebx), 16);
+    // 	mov edx,workspaceA.dvx
+    mov(x86_op_reg(edx), x86_op_mem32(&workspaceA.dvx));
+    // 	shl edx,16
+    shl(x86_op_reg(edx), 16);
+    // 	mov workspaceA.svf,ebx
+    mov(x86_op_mem32(&workspaceA.svf), x86_op_reg(ebx));
+    // 	mov ebx,workspaceA.dvy0
+    mov(x86_op_reg(ebx), x86_op_mem32(&workspaceA.dvy0));
+    // 	mov workspaceA.dvxf,edx
+    mov(x86_op_mem32(&workspaceA.dvxf), x86_op_reg(edx));
+    // 	shl ebx,16
+    shl(x86_op_reg(ebx), 16);
+    // 	mov edx,workspaceA.dvy1
+    mov(x86_op_reg(edx), x86_op_mem32(&workspaceA.dvy1));
+
+    // 	shl edx,16
+    shl(x86_op_reg(edx), 16);
+    // 	mov workspaceA.dvy0f,ebx
+    mov(x86_op_mem32(&workspaceA.dvy0f), x86_op_reg(ebx));
+    // 	mov workspaceA.dvy1f,edx
+    mov(x86_op_mem32(&workspaceA.dvy1f), x86_op_reg(edx));
+
+    // ;integer parts
+
+    // 	mov ebx,workspaceA.sv
+    mov(x86_op_reg(ebx), x86_op_mem32(&workspaceA.sv));
+
+    // 	sar ebx,16
+    sar(x86_op_reg(ebx), 16);
+    // 	mov edx,workspaceA.dvx
+    mov(x86_op_reg(edx), x86_op_mem32(&workspaceA.dvx));
+
+    // 	sar edx,16
+    sar(x86_op_reg(edx), 16);
+    // 	mov workspaceA.sv,ebx
+    mov(x86_op_mem32(&workspaceA.sv), x86_op_reg(ebx));
+
+    // 	mov ebx,workspaceA.dvy0
+    mov(x86_op_reg(ebx), x86_op_mem32(&workspaceA.dvy0));
+    // 	mov workspaceA.dvx,edx
+    mov(x86_op_mem32(&workspaceA.dvx), x86_op_reg(edx));
+
+    // 	sar ebx,16
+    sar(x86_op_reg(ebx), 16);
+    // 	mov edx,workspaceA.dvy1
+    mov(x86_op_reg(edx), x86_op_mem32(&workspaceA.dvy1));
+
+    // 	sar edx,16
+    sar(x86_op_reg(edx), 16);
+    // 	mov workspaceA.dvy0,ebx
+    mov(x86_op_mem32(&workspaceA.dvy0), x86_op_reg(ebx));
+
+    // 	mov workspaceA.dvy1,edx
+    mov(x86_op_mem32(&workspaceA.dvy1), x86_op_reg(edx));
+
+    // endm
+}
+
+// MULTIPLY_UP_V_BY_STRIDE macro magic; 24 cycles
+void MULTIPLY_UP_V_BY_STRIDE(float magic)
+{
+    //  ;										st(0)		st(1)		st(2)		st(3)		st(4)		st(5) st(6) st(7)
+
+    // 	fild work.texture.stride_b		;	d
+    fild(work.texture.stride_b);
+    // 	fild workspaceA.sv					;	sp			d
+    fild(workspaceA.sv);
+    // 	fild workspaceA.dvx					;	dpdx		sp			d
+    fild(workspaceA.dvx);
+    // 	fild workspaceA.dvy0					;	dpdy0		dpdx		sp			d
+    fild(workspaceA.dvy0);
+    // 	fxch st(2)						;	sp			dpdx		dpdy0		d
+    fxch(2);
+    // 	fmul st,st(3)					;	spd			dpdx		dpdy0		d
+    fmul_2(x87_op_i(0), x87_op_i(3));
+    // 	fild workspaceA.dvy1					;	dpdy1		spd			dpdx		dpdy0		d
+    fild(workspaceA.dvy1);
+    // 	fxch st(2)						;	dpdx		spd			dpdy1		dpdy0		d
+    fxch(2);
+    // 	fmul st,st(4)					;	dpdxd		spd			dpdy1		dpdy0		d
+    fmul_2(x87_op_i(0), x87_op_i(4));
+    // 	 fxch st(1)						;	spd			dpdxd		dpdy1		dpdy0		d
+    fxch(1);
+    // 	fadd magic						;	spdx		dpdxd		dpdy1		dpdy0		d
+    fadd(x87_op_f(magic));
+    // 	 fxch st(3)						;	dpdy0		dpdxd		dpdy1		spdx		d
+    fxch(3);
+    // 	fmul st,st(4)					;	dpdy0d		dpdxd		dpdy1		spdx		d
+    fmul_2(x87_op_i(0), x87_op_i(4));
+    // 	 fxch st(1)						;	dpdxd		dpdy0d		dpdy1		spdx		d
+    fxch(1);
+    // 	fadd magic						;	dpdxdx		dpdy0d		dpdy1		spdx		d
+    fadd(x87_op_f(magic));
+    // 	 fxch st(2)						;	dpdy1		dpdy0d		dpdxdx		spdx		d
+    fxch(2);
+    // 	fmul st,st(4)					;	dpdy1d		dpdy0d		dpdxdx		spdx		d
+    fmul_2(x87_op_i(0), x87_op_i(4));
+    // 	 fxch st(4)						;	d			dpdy0d		dpdxdx		spdx		dpdy1d
+    fxch(4);
+    // 	fstp st(0)						;	dpdy0d		dpdxdx		spdx		dpdy1d
+    fstp(x87_op_i(0));
+    // 	fadd magic						;	dpdy0dx		dpdxdx		spdx		dpdy1d
+    fadd(x87_op_f(magic));
+    // 	 fxch st(3)						;	dpdy1d		dpdxdx		spdx		dpdy0dx
+    fxch(3);
+    // 	fadd magic						;	dpdy1dx		dpdxdx		spdx		dpdy0dx
+    fadd(x87_op_f(magic));
+    // 	 fxch st(2)						;	spdx		dpdxdx		dpdy1dx		dpdy0dx
+    fxch(2);
+    // 	fstp qword ptr workspaceA.sv			;	dpdxdx		dpdy1dx		dpdy0dx
+    fstp(x87_op_mem64(&workspaceA.sv));
+    // 	fstp qword ptr workspaceA.dvx			;	dpdy1dx		dpdy0dx
+    fstp(x87_op_mem64(&workspaceA.dvx));
+    // 	fstp qword ptr workspaceA.dvy1		;	dpdy0dx
+    fstp(x87_op_mem64(&workspaceA.dvy1));
+    // 	fstp qword ptr workspaceA.dvy0		;
+    fstp(x87_op_mem64(&workspaceA.dvy0));
+    // endm
+}
+
+void CREATE_CARRY_VERSIONS()
+{
+    // mov eax,workspaceA.dvy0
+    mov(x86_op_reg(eax), x86_op_mem32(&workspaceA.dvy0));
+    // mov ebx,workspaceA.dvy1
+    mov(x86_op_reg(ebx), x86_op_mem32(&workspaceA.dvy1));
+
+    // add eax,work.texture.stride_b
+    add(x86_op_reg(eax), x86_op_mem32(&work.texture.stride_b));
+    // mov ecx,workspaceA.dvx
+    mov(x86_op_reg(ecx), x86_op_mem32(&workspaceA.dvx));
+
+    // add ebx,work.texture.stride_b
+    add(x86_op_reg(ebx), x86_op_mem32(&work.texture.stride_b));
+    // add ecx,work.texture.stride_b
+    add(x86_op_reg(ecx), x86_op_mem32(&work.texture.stride_b));
+
+    // mov workspaceA.dvy0c,eax
+    mov(x86_op_mem32(&workspaceA.dvy0c), x86_op_reg(eax));
+    // mov workspaceA.dvy1c,ebx
+    mov(x86_op_mem32(&workspaceA.dvy1c), x86_op_reg(ebx));
+
+    // mov workspaceA.dvxc,ecx
+    mov(x86_op_mem32(&workspaceA.dvxc), x86_op_reg(ecx));
+}
+
+void WRAP_SETUP()
+{
+    // mov ecx,
+    mov(x86_op_reg(ecx), x86_op_mem32(&work.texture.width_p));
+    // mov eax,work.texture._size
+    mov(x86_op_reg(eax), x86_op_mem32(&work.texture.size));
+    // shl ecx,16
+    shl(x86_op_reg(ecx), 16);
+    // add eax,work.texture.base
+    // add(x86_op_reg(eax), x86_op_ptr(work.texture.base));  //doesnt work with pointers
+    // mov workspaceA.uUpperBound,ecx
+    mov(x86_op_mem32(&workspaceA.uUpperBound), x86_op_reg(ecx));
+    // mov workspaceA.vUpperBound,eax
+    // mov(x86_op_mem32(&workspaceA.vUpperBound), x86_op_reg(eax)); doesn't work with pointers
+
+    workspaceA.vUpperBound = ((uint8_t *)work.texture.base) + work.texture.size;
 }

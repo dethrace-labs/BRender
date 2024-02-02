@@ -60,9 +60,9 @@ static int __OFADD__(uint32_t x, uint32_t y)
 struct temp_vertex_fixed {
 };
 
-float                            temp;
-struct workspace_t               workspace;
-struct ArbitraryWidthWorkspace_t workspaceA;
+float temp;
+// struct workspace_t               workspace;
+// struct ArbitraryWidthWorkspace_t workspaceA;
 
 extern int BR_ASM_CALL SafeFixedMac2Div(int, int, int, int, int);
 

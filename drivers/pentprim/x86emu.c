@@ -9,6 +9,7 @@ int    fpu_st0_ptr = -1;
 int    ZF          = 0;
 int    CF          = 0;
 int    SF          = 0;
+int    inited      = 0;
 
 x86_reg *eax, *ebx, *ecx, *edx, *esi, *ebp, *edi;
 
@@ -33,6 +34,9 @@ int x86emu_fpu_stack_top()
 
 void x86emu_init()
 {
+    if(inited) {
+        return;
+    }
     eax = malloc(sizeof(x86_reg));
     ebx = malloc(sizeof(x86_reg));
     ecx = malloc(sizeof(x86_reg));
@@ -160,7 +164,6 @@ fld(20)
             break;
         case X87_OP_FLOAT:
             fpu_stack[fpu_st0_ptr + 1] = op.float_val;
-            printf("fld %f\n", op.float_val);
             break;
         case X87_OP_DOUBLE:
             fpu_stack[fpu_st0_ptr + 1] = op.double_val;
@@ -179,9 +182,15 @@ void fild(int val)
     assert(fpu_st0_ptr < 7);
 }
 
+void fild_ptr(void *val)
+{
+    fpu_stack[fpu_st0_ptr + 1] = *(double *)val;
+    fpu_st0_ptr++;
+    assert(fpu_st0_ptr < 7);
+}
+
 void fsub(float v)
 {
-    printf("fsub %f\n", v);
     *st(0) -= v;
 }
 
@@ -446,6 +455,33 @@ void and (x86_operand dest, x86_operand src)
         case X86_OP_REG:
             dest.reg->uint_val &= *(uint32_t *)src_val;
             break;
+        case X86_OP_MEM32:
+            *(uint32_t *)dest.mem.ptr_val &= *(uint32_t *)src_val;
+            break;
+        default:
+            fail();
+    }
+}
+
+void add(x86_operand dest, x86_operand src)
+{
+    void *src_val;
+    int   size;
+    switch(src.type) {
+        case X86_OP_MEM32:
+            src_val = src.mem.ptr_val;
+            size    = 4;
+            break;
+        case X86_OP_IMM:
+            src_val = &src.imm;
+            break;
+        default:
+            fail();
+    }
+    switch(dest.type) {
+        case X86_OP_REG:
+            dest.reg->uint_val += *(uint32_t *)src_val;
+            break;
         default:
             fail();
     }
@@ -496,6 +532,17 @@ void sar(x86_operand dest, int count)
     while(count != 0) {
         CF = dest.reg->uint_val & 1;
         dest.reg->int_val /= 2; // signed divide
+        count--;
+    }
+}
+
+void shl(x86_operand dest, int count)
+{
+    assert(dest.type == X86_OP_REG);
+
+    while(count != 0) {
+        CF                 = dest.reg->uint_val & 0x80000000; // msb
+        dest.reg->uint_val = dest.reg->uint_val << 1;
         count--;
     }
 }
