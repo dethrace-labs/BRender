@@ -93,6 +93,7 @@ void xor_(x86_operand dest, x86_operand src);
 void cmp(x86_operand dest, x86_operand src);
 void rcl(x86_operand dest, int count);
 void sub(x86_operand dest, x86_operand src);
+void sbb(x86_operand dest, x86_operand src);
 void and (x86_operand dest, x86_operand src);
 void add(x86_operand dest, x86_operand src);
 void or (x86_operand dest, x86_operand src);

@@ -811,7 +811,7 @@ void SETUP_FLAGS()
     mov(x86_op_reg(esi), x86_op_imm(0));
 wrapped:
     // 	mov eax,workspace.flip
-    mov(x86_op_reg(esi), x86_op_mem32(&workspace.flip));
+    mov(x86_op_reg(eax), x86_op_mem32(&workspace.flip));
     // 	or eax,esi
     or (x86_op_reg(eax), x86_op_reg(esi));
     // 	mov workspaceA.flags,eax

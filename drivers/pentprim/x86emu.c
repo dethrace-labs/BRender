@@ -422,12 +422,42 @@ void sub(x86_operand dest, x86_operand src)
             src_val = src.reg->bytes;
             size    = 4;
             break;
+        case X86_OP_IMM:
+            src_val = &src.imm;
+            size    = 4;
+            break;
         default:
             fail();
     }
     switch(dest.type) {
         case X86_OP_REG:
+            if(*(uint32_t *)src_val > dest.reg->uint_val) {
+                CF = 1;
+            } else {
+                CF = 0;
+            }
             dest.reg->uint_val -= *(uint32_t *)src_val;
+            break;
+        default:
+            fail();
+    }
+}
+
+void sbb(x86_operand dest, x86_operand src)
+{
+    void *src_val;
+    int   size;
+    switch(src.type) {
+        case X86_OP_REG:
+            src_val = src.reg->bytes;
+            size    = 4;
+            break;
+        default:
+            fail();
+    }
+    switch(dest.type) {
+        case X86_OP_REG:
+            dest.reg->uint_val = (dest.reg->uint_val - (*(uint32_t *)src_val + CF));
             break;
         default:
             fail();
@@ -475,12 +505,20 @@ void add(x86_operand dest, x86_operand src)
         case X86_OP_IMM:
             src_val = &src.imm;
             break;
+        case X86_OP_REG:
+            src_val = &src.reg->uint_val;
+            break;
         default:
             fail();
     }
     switch(dest.type) {
         case X86_OP_REG:
             dest.reg->uint_val += *(uint32_t *)src_val;
+            if(dest.reg->uint_val < *(uint32_t *)src_val) {
+                CF = 1;
+            } else {
+                CF = 0;
+            }
             break;
         default:
             fail();

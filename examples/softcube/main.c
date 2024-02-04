@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 
         camera         = BrActorAdd(world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
         camera->t.type = BR_TRANSFORM_MATRIX34;
-        BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(2.0));
+        BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(5.0));
 
         camera_data         = (br_camera *)camera->type_data;
         camera_data->aspect = BR_DIV(BR_SCALAR(colour_buffer->width), BR_SCALAR(colour_buffer->height));

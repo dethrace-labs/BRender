@@ -22,6 +22,7 @@ typedef struct counts_tag_t {
 
 struct workspace_t {
     // qwords start here
+
     uint32_t xm;
     uint32_t d_xm;
 
@@ -61,10 +62,14 @@ struct workspace_t {
     uint32_t d_s_x;
     uint32_t d_s_y_0;
 
+    // scanAddress in the original 32 bit code was a pointer into the color buffer
+    // now is an offset that is added to `work.colour.base`
     uint32_t scanAddress;
     uint32_t scanAddressTrashed;
 
-    char    *depthAddress;
+    // depthAddress in the original 32 bit code was a pointer into the color buffer
+    // now is an offset that is added to `work.depth.base`
+    uint32_t depthAddress;
     uint32_t depthAddressTrashed;
 
     // qwords end here
@@ -141,6 +146,9 @@ struct ArbitraryWidthWorkspace_t {
     uint32_t pad3;
 
     uint32_t pad10;
+
+    // originally a pointer into work.texture.base
+    // now only an offset
     uint32_t sv;
     uint32_t pad4;
 
