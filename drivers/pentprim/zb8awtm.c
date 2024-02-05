@@ -144,32 +144,39 @@ void TriangleRender_ZT_I8_D16(brp_block *block, ...)
 
 void Draw_ZT_I8_NWLR()
 {
+    exit(1);
     DRAW_ZT_I8(&workspace.x1, &workspace.d_x1, DRAW_LR, &workspace.topCount, WRAPPED, 0, 0);
     DRAW_ZT_I8(&workspace.x2, &workspace.d_x2, DRAW_LR, &workspace.bottomCount, WRAPPED, 0, 0);
 }
 
 void Draw_ZT_I8_NWRL()
 {
+    exit(1);
     DRAW_ZT_I8(&workspace.x1, &workspace.d_x1, DRAW_RL, &workspace.topCount, WRAPPED, 0, 0);
     DRAW_ZT_I8(&workspace.x2, &workspace.d_x2, DRAW_RL, &workspace.bottomCount, WRAPPED, 0, 0);
 }
 
 void Draw_ZT_I8_DWLR()
 {
-    // DRAW_ZT_I8(&workspace.x1, &workspace.d_x1, DRAW_LR, &workspace.topCount, WRAPPED, 0, 0);
-    // DRAW_ZT_I8(&workspace.x2, &workspace.d_x2, DRAW_LR, &workspace.bottomCount, WRAPPED, 0, 0);
+    // workspace.topCount = 10;
+    //    X0 256 Y0 176 - 384 304
+    //    X0 256 Y0 176 - 256 304
+    // workspace.d_x1 = 90000;
+    DRAW_ZT_I8(&workspace.x1, &workspace.d_x1, DRAW_LR, &workspace.topCount, WRAPPED, 0, 0);
+    DRAW_ZT_I8(&workspace.x2, &workspace.d_x2, DRAW_LR, &workspace.bottomCount, WRAPPED, 0, 0);
 }
 
 void Draw_ZT_I8_DWRL()
 {
+    exit(1);
     DRAW_ZT_I8(&workspace.x1, &workspace.d_x1, DRAW_RL, &workspace.topCount, WRAPPED, 0, 0);
     DRAW_ZT_I8(&workspace.x2, &workspace.d_x2, DRAW_RL, &workspace.bottomCount, WRAPPED, 0, 0);
 }
 
 // DRAW_ZT_I8 macro minorX,direction,half,wrap_flag,fogging,blend
-void DRAW_ZT_I8(uint32_t *minorX, uint32_t *d_minorX, char direction, uint32_t *halfCount, char wrap_flag, char fogging, char blend)
+void DRAW_ZT_I8(uint32_t *minorX, uint32_t *d_minorX, char direction, int32_t *halfCount, char wrap_flag, char fogging, char blend)
 {
-    printf("DRAW_ZT_I8\n");
+    printf("DRAW_ZT_I8 %d\n", *halfCount);
     // 	local drawPixel,drawLine,done,lineDrawn,noPlot,noCarry,returnAddress
     // 	local uPerPixelNoWrapNegative,uPerPixelNoWrapPositive,vPerPixelNoWrapNegative,vPerPixelNoWrapPositive
     // 	local uAboveRetest,uBelowRetest,vAboveRetest,vBelowRetest
@@ -196,7 +203,6 @@ void DRAW_ZT_I8(uint32_t *minorX, uint32_t *d_minorX, char direction, uint32_t *
     // 	mov workspace.c_u,eax
     workspace.c_u = eax->uint_val;
     // 	mov workspace.c_v,ebx
-    printf("(2) c_z %d\n", ebx->uint_val);
     workspace.c_v = ebx->uint_val;
     // 	mov workspace.c_z,ecx
     workspace.c_z = ecx->uint_val;
@@ -207,6 +213,8 @@ void DRAW_ZT_I8(uint32_t *minorX, uint32_t *d_minorX, char direction, uint32_t *
     ecx->uint_val = workspace.xm;
 
 drawLine:
+    printf("drawLine, len %d, ecx: %d, ebx: %d, scan %d\n", (ebx->uint_val >> 16) - (ecx->uint_val >> 16),
+           ecx->int_val >> 16, ebx->int_val >> 16, workspace.scanAddress);
     // 	mov ebp,workspace.depthAddress
     ebp->uint_val = workspace.depthAddress;
 
@@ -218,10 +226,13 @@ drawLine:
     // 	shr ecx,16
     shr(x86_op_reg(ecx), 16);
     // 	add edi,ebx
+
     edi->uint_val += ebx->uint_val;
+    printf("increment edi by %d, now %d\n", ebx->uint_val, edi->uint_val);
 
     // 	sub ecx,ebx
     ecx->uint_val -= ebx->uint_val;
+    printf("dec ecx edi by %d, now %d\n", ebx->uint_val, ecx->uint_val);
 
     // ifidni <wrap_flag>,<WRAPPED>
     if(wrap_flag == WRAPPED) {
@@ -281,7 +292,7 @@ drawPixel:
 
     // 	mov bl,[esi+eax]
     // TODO texture coloring
-    ebx->uint_val = 20; //((uint8_t *)work.texture.base)[esi->uint_val + eax->uint_val];
+    ebx->uint_val = 255; //((uint8_t *)work.texture.base)[esi->uint_val + eax->uint_val];
 
     // 	test bl,bl
     // 	jz noPlot
@@ -324,6 +335,7 @@ drawPixel:
     //     mov [ebp+2*ecx],dx
     // zbuffer
     // 	   mov [edi+ecx],bl
+    // printf("ecx %d, (%d,%d)\n", ecx->uint_val, (edi->uint_val + ecx->uint_val) % 640, (edi->uint_val + ecx->uint_val) / 640);
     if(edi->uint_val + ecx->uint_val > 640 * 480) {
         int c = 0;
     }
@@ -371,7 +383,7 @@ vAboveRetest:
     // 	sub esi,work.texture._size
     // 	jmp vAboveRetest
     // vPerPixelNoWrapPositive:
-    // endif
+    //  endif
 
     // 	mov eax,workspace.c_u
     eax->uint_val = workspace.c_u;
@@ -385,22 +397,22 @@ vAboveRetest:
 uBelowRetest:
     // 	cmp eax,0
     // 	jge uPerPixelNoWrapNegative
-    if(eax->uint_val >= 0) {
+    if(eax->int_val >= 0) {
         goto uPerPixelNoWrapNegative;
     }
     // 	add eax,workspaceA.uUpperBound
-    eax->uint_val += workspaceA.uUpperBound;
+    eax->int_val += workspaceA.uUpperBound;
     // 	jmp uBelowRetest
     goto uBelowRetest;
 uPerPixelNoWrapNegative:
 uAboveRetest:
     // 	cmp eax,workspaceA.uUpperBound
     // 	jl uPerPixelNoWrapPositive
-    if(eax->uint_val < workspaceA.uUpperBound) {
+    if(eax->int_val < workspaceA.uUpperBound) {
         goto uPerPixelNoWrapPositive;
     }
     // 	sub eax,workspaceA.uUpperBound
-    eax->uint_val -= workspaceA.uUpperBound;
+    eax->int_val -= workspaceA.uUpperBound;
     // 	jmp uAboveRetest
     goto uAboveRetest;
 uPerPixelNoWrapPositive:
@@ -425,9 +437,9 @@ uPerPixelNoWrapPositive:
 
     // 	inc_d ecx,direction
     if(direction == DRAW_LR) {
-        ecx->uint_val++;
+        ecx->int_val++;
     } else {
-        ecx->uint_val--;
+        ecx->int_val--;
     }
 
     // 	jle_d drawPixel,direction
@@ -450,6 +462,10 @@ lineDrawn:
 returnAddress:
     // 	mov workspace.&half&Count,edx
     // 	jge drawLine
+    *halfCount = edx->int_val;
+    if(edx->int_val >= 0) {
+        goto drawLine;
+    }
 
 done:
     ecx->uint_val = 0;
@@ -457,10 +473,12 @@ done:
 }
 
 // PER_SCAN_ZT macro half,wrap_flag,minorX
-void PER_SCAN_ZT(uint32_t *halfCount, char wrap_flag, uint32_t *minorX, uint32_t *d_minorX)
+void PER_SCAN_ZT(int32_t *halfCount, char wrap_flag, uint32_t *minorX, uint32_t *d_minorX)
 {
     // 	local uPerLineNoWrapNegative,uPerLineNoWrapPositive,vPerLineNoWrapNegative,vPerLineNoWrapPositive
     // 	local uAboveRetest,uBelowRetest,vAboveRetest,vBelowRetest
+
+    printf("PER_SCAN_ZT\n");
 
     // 	mov ebp,workspace.xm_f
     ebp->uint_val = workspace.xm_f;
@@ -493,7 +511,7 @@ void PER_SCAN_ZT(uint32_t *halfCount, char wrap_flag, uint32_t *minorX, uint32_t
     // 	add edx,[workspaceA.duy0+8*edi]
     edx->uint_val += ((uint32_t *)&workspaceA.duy0)[2 * edi->int_val];
     // 	add eax,[workspaceA.dvy0f+4*edi]
-    add(x86_op_reg(edx), x86_op_imm(((uint32_t *)&workspaceA.dvy0f)[edi->int_val]));
+    add(x86_op_reg(eax), x86_op_imm(((uint32_t *)&workspaceA.dvy0f)[edi->int_val]));
 
     // 	rcl esi,1
     rcl(x86_op_reg(esi), 1);
@@ -501,7 +519,6 @@ void PER_SCAN_ZT(uint32_t *halfCount, char wrap_flag, uint32_t *minorX, uint32_t
     workspaceA.svf = eax->uint_val;
 
     // 	mov workspace.c_v,eax
-    printf("c_z %d\n", eax->uint_val);
     workspace.c_v = eax->uint_val;
     // 	add ecx,ebp
     ecx->uint_val += ebp->uint_val;
@@ -542,7 +559,7 @@ void PER_SCAN_ZT(uint32_t *halfCount, char wrap_flag, uint32_t *minorX, uint32_t
 uBelowRetest:
     // 	cmp edx,0
     // 	jge uPerLineNoWrapNegative
-    if(eax->int_val >= 0) {
+    if(edx->int_val >= 0) {
         goto uPerLineNoWrapNegative;
     }
     // 	add edx,workspaceA.uUpperBound

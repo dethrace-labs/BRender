@@ -9,7 +9,7 @@
 #include "drv.h"
 #include "shortcut.h"
 #include "brassert.h"
-
+#include <stdio.h>
 static char rscid[] = "$Id: l_pi.c 1.1 1997/12/10 16:47:11 jon Exp $";
 
 #define ABS(x) (((x) < 0) ? -(x) : (x))
@@ -349,6 +349,7 @@ void BR_ASM_CALL LineRenderPITI(struct brp_block *block, union brp_vertex *v0, u
 }
 #endif
 
+#define PARTS 1
 #if PARTS & PART_8
 /*
  * Arbitrary size textured lines
@@ -492,6 +493,7 @@ void BR_ASM_CALL LineRenderPIT(struct brp_block *block, ...)
         }
 
         ptr = (char *)work.colour.base + X0 + Y0 * work.colour.stride_b;
+        printf("X0 %d Y0 %d - %d %d\n", X0, Y0, X1, Y1);
 
         count = dy;
 

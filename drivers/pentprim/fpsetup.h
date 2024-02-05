@@ -106,8 +106,8 @@ struct workspace_t {
     uint32_t     top_vertex;
     uint32_t     xm_f;
     uint32_t     d_xm_f;
-    uint32_t     topCount;
-    uint32_t     bottomCount;
+    int32_t      topCount;
+    int32_t      bottomCount;
     uint32_t     colour;
     uint32_t     colourExtension;
     uint32_t     shadeTable;
