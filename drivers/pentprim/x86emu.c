@@ -4,18 +4,18 @@
 #include <stdio.h>
 #include <assert.h>
 
-double fpu_stack[8];
-int    fpu_st0_ptr = -1;
-int    ZF          = 0;
-int    CF          = 0;
-int    SF          = 0;
-int    inited      = 0;
+long double fpu_stack[8];
+int         fpu_st0_ptr = -1;
+int         ZF          = 0;
+int         CF          = 0;
+int         SF          = 0;
+int         inited      = 0;
 
 x86_reg *eax, *ebx, *ecx, *edx, *esi, *ebp, *edi;
 
 // #define ST_(i) fpu_stack[fpu_st0_ptr - i]
 
-double *st(int i)
+long double *st(int i)
 {
     assert(fpu_st0_ptr - i >= 0);
     assert(fpu_st0_ptr - i <= 7);
@@ -236,9 +236,9 @@ void fdivrp(int dest, int src)
 
 void fxch(int i)
 {
-    double tmp = *st(0);
-    *st(0)     = *st(i);
-    *st(i)     = tmp;
+    long double tmp = *st(0);
+    *st(0)          = *st(i);
+    *st(i)          = tmp;
 }
 
 void fst(x87_operand dest)
@@ -248,7 +248,7 @@ void fst(x87_operand dest)
             *(float *)dest.mem = (float)*st(0);
             break;
         case X87_OP_MEM64:
-            *(double *)dest.mem = *st(0);
+            *(double *)dest.mem = (double)*st(0);
             break;
         case X87_OP_ST:
             assert(dest.st_index == 0);
@@ -580,4 +580,9 @@ void shl(x86_operand dest, int count)
         dest.reg->uint_val = dest.reg->uint_val << 1;
         count--;
     }
+}
+
+void fldi(double d)
+{
+    *st(0) = d;
 }

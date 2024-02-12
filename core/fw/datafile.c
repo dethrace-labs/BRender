@@ -10,11 +10,19 @@
 #include "brassert.h"
 #include "brhton.h"
 #include "datafile.h"
+#include <stdio.h>
 #include "shortcut.h"
+
+typedef struct br_file2 {
+    void      *raw_file;
+    br_boolean writing;
+    int        mode;
+    char       name[1];
+} br_file2;
 
 BR_RCS_ID("$Id: datafile.c 1.4 1998/07/21 17:32:46 jon Exp $")
 
-#define CHUNK_LOG 0
+#define CHUNK_LOG 1
 
 /*
  * maximum length of lines in text data files
@@ -1992,6 +2000,8 @@ int DfChunksInterpret(br_datafile *df, br_chunks_table *table)
         /*
          * Read the next chunk header
          */
+        long offset = ftell(((br_file2 *)df->h)->raw_file);
+        BrLogPrintf("offset is %ld\n", offset);
         id = df->prims->chunk_read(df, &length);
 
         /*

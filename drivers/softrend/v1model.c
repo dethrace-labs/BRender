@@ -441,7 +441,6 @@ void GEOMETRY_CALL V1Face_OS_Render(struct br_geometry *self, struct br_renderer
             brp_vertex *v1 = rend.temp_vertices + (*fp_vertices)[1];
             brp_vertex *v2 = rend.temp_vertices + (*fp_vertices)[2];
 
-            printf("v0 %d, v1 %d v2 %d\n", v0->flags, v1->flags, v2->flags);
             // clang-format off
 			unclipped->render(unclipped,
 				rend.temp_vertices+(*fp_vertices)[0],
@@ -449,7 +448,7 @@ void GEOMETRY_CALL V1Face_OS_Render(struct br_geometry *self, struct br_renderer
 				rend.temp_vertices+(*fp_vertices)[2],
 				fp_vertices, fp_edges, fp_eqn, tfp);
             // clang-format on
-            break; // render 1 face
+            // break; // one triangle only
 #endif
         }
     }

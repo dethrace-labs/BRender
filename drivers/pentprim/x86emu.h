@@ -87,6 +87,7 @@ void fdivrp(int dest, int src);
 void fxch(int i);
 void fst(x87_operand dest);
 void fstp(x87_operand dest);
+void fldi(double);
 
 void mov(x86_operand dest, x86_operand src);
 void xor_(x86_operand dest, x86_operand src);
