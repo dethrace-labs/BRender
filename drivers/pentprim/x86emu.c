@@ -267,7 +267,18 @@ void fstp(x87_operand dest)
 
 void fadd(x87_operand op)
 {
+    float  f;
+    double d;
+
     switch(op.type) {
+        case X87_OP_MEM32:
+            memcpy(&f, op.mem, 4);
+            *st(0) += f;
+            break;
+        case X87_OP_MEM64:
+            memcpy(&d, op.mem, 8);
+            *st(0) += d;
+            break;
         case X87_OP_FLOAT:
             *st(0) += op.float_val;
             break;

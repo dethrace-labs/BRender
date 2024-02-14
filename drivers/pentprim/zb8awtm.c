@@ -28,15 +28,6 @@ void TriangleRender_ZT_I8_D16(brp_block *block, ...)
     workspace.v1 = v1;
     workspace.v2 = v2;
 
-    unsigned char x[4];
-    unsigned char x1[4];
-    unsigned char x2[4];
-    unsigned char x3[4];
-    memcpy(x, &fp_conv_d, 4);
-    // memcpy(x1, &fp_conv_d1, 4);
-    memcpy(x2, &fp_conv_d2, 4);
-    // memcpy(x3, &fp_conv_d3, 4);
-
     TriangleSetup_ZT_ARBITRARY(v0, v1, v2);
 
     //     ; Floating point address calculation - 20 cycles, (Integer=26)
@@ -72,7 +63,7 @@ void TriangleRender_ZT_I8_D16(brp_block *block, ...)
     // 	 fxch st(3)						;	cb-1		cs			ty-1		db-2		ds
     fxch(3);
     // 	fadd fp_conv_d					;	cb-1I		cs			ty-1		db-2		ds
-    fadd(x87_op_f(fp_conv_d));
+    fadd(x87_op_mem32(&fp_conv_d));
     // 	 fxch st(1)						;	cs			cb-1I		ty-1		db-2		ds
     fxch(1);
     // 	fmul st,st(2)					;	csy			cb-1I		ty-1		db-2		ds
@@ -80,7 +71,7 @@ void TriangleRender_ZT_I8_D16(brp_block *block, ...)
     // 	 fxch st(3)						;	db-2		cb-1I		ty-1		csy			ds
     fxch(3);
     // 	fadd fp_conv_d					;	db-2I		cb-1I		ty-1		csy			ds
-    fadd(x87_op_f(fp_conv_d));
+    fadd(x87_op_mem32(&fp_conv_d));
     // 	 fxch st(2)						;	ty-1		cb-1I		db-2I		csy			ds
     fxch(2);
     // 	fmulp st(4),st					;	cb-1I		db-2I		csy			dsy

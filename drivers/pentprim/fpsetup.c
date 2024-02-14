@@ -6,14 +6,16 @@
 #include <assert.h>
 #include <stdio.h>
 
-double  fconv_d16_12[2] = {1.03079215104e11, 1.03079215105e11};
-double  fconv_d16_m[2]  = {1.03079215105e11, 1.03079215104e11};
-float   fp_one          = 1.0f;
-float   fp_two          = 2.0f;
-float   fp_conv_d       = 6.7553994e15; // 0x59C00000;
-int32_t fp_conv_d2      = (127 + 52 - 0) << 23 + (1 >> 22);
-float   fp_conv_d8      = 2.6388279e13;
-float   fp_conv_d8r     = 1.7293823e18;
+double fconv_d16_12[2] = {1.03079215104e11, 1.03079215105e11};
+double fconv_d16_m[2]  = {1.03079215105e11, 1.03079215104e11};
+float  fp_one          = 1.0f;
+float  fp_two          = 2.0f;
+// float  fp_conv_d       = 6.7553994e15; // 0x59C00000;
+// float  fp_conv_d8      = 2.6388279e13;
+// float  fp_conv_d8r     = 1.7293823e18;
+uint32_t fp_conv_d   = 0x59C00000;
+float    fp_conv_d8  = 2.6388279e13;
+float    fp_conv_d8r = 1.7293823e18;
 // float   fp_conv_d16     = 1.0307922e11;
 uint32_t fp_conv_d16 = 0x51C00000;
 float    fp_conv_d24 = 4.0265318e8;
@@ -421,7 +423,7 @@ count_cont:
     // 		 fxch		st(3)						;	g1		x_2		t_dy*gm	x_1		gm		g2
     fxch(3);
     // 		fadd		fp_conv_d16		            ;	g1+C	x_2		t_dy*gm	x_1		gm		g2
-    fadd(x87_op_f(*(float *)&fp_conv_d16));
+    fadd(x87_op_mem32(&fp_conv_d16));
     // 		 fxch		st(2)						;	t_dy*gm	x_2		g1+C	x_1		gm		g2
     fxch(2);
     // 		fadd		[eax].comp_f[C_SX*4]		;	x_m		x_2		g1+C	x_1		gm		g2
@@ -429,7 +431,7 @@ count_cont:
     // 		 fxch		st(4)						;	gm		x_2		g1+C	x_1		x_m		g2
     fxch(4);
     // 		fadd		fp_conv_d16		            ;	gm+C	x_2		g1+C	x_1		x_m		g2
-    fadd(x87_op_f(*(float *)&fp_conv_d16));
+    fadd(x87_op_mem32(&fp_conv_d16));
     // 		 fxch		st(1)						;	x_2		gm+C	g1+C	x_1		x_m		g2
     fxch(1);
     // 		fadd	fconv_d16_12[esi*8]	            ;	x_2+C	gm+C	g1+C	x_1		x_m		g2
@@ -438,7 +440,7 @@ count_cont:
     // 		 fxch		st(5)						;	g2		gm+C	g1+C	x_1		x_m		x_2+C
     fxch(5);
     // 		fadd		fp_conv_d16		              ;	g2+C	gm+C	g1+C	x_1		x_m		x_2+C
-    fadd(x87_op_f(*(float *)&fp_conv_d16));
+    fadd(x87_op_mem32(&fp_conv_d16));
     // 		 fxch		st(2)						;	g1+C	gm+C	g2+C	x_1		x_m		x_2+C
     fxch(2);
     // 		fstp real8 ptr [workspace].x1			;	gm+C	g2+C	x_1		x_m		x_2+C
@@ -1077,7 +1079,7 @@ void SPLIT_INTO_INTEGER_AND_FRACTIONAL_PARTS()
 }
 
 // MULTIPLY_UP_V_BY_STRIDE macro magic; 24 cycles
-void MULTIPLY_UP_V_BY_STRIDE(float magic)
+void MULTIPLY_UP_V_BY_STRIDE(uint32_t magic)
 {
     //  ;										st(0)		st(1)		st(2)		st(3)		st(4)		st(5) st(6) st(7)
 
@@ -1102,7 +1104,7 @@ void MULTIPLY_UP_V_BY_STRIDE(float magic)
     // 	 fxch st(1)						;	spd			dpdxd		dpdy1		dpdy0		d
     fxch(1);
     // 	fadd magic						;	spdx		dpdxd		dpdy1		dpdy0		d
-    fadd(x87_op_f(magic));
+    fadd(x87_op_mem32(&magic));
     // 	 fxch st(3)						;	dpdy0		dpdxd		dpdy1		spdx		d
     fxch(3);
     // 	fmul st,st(4)					;	dpdy0d		dpdxd		dpdy1		spdx		d
@@ -1110,7 +1112,7 @@ void MULTIPLY_UP_V_BY_STRIDE(float magic)
     // 	 fxch st(1)						;	dpdxd		dpdy0d		dpdy1		spdx		d
     fxch(1);
     // 	fadd magic						;	dpdxdx		dpdy0d		dpdy1		spdx		d
-    fadd(x87_op_f(magic));
+    fadd(x87_op_mem32(&magic));
     // 	 fxch st(2)						;	dpdy1		dpdy0d		dpdxdx		spdx		d
     fxch(2);
     // 	fmul st,st(4)					;	dpdy1d		dpdy0d		dpdxdx		spdx		d
@@ -1120,11 +1122,11 @@ void MULTIPLY_UP_V_BY_STRIDE(float magic)
     // 	fstp st(0)						;	dpdy0d		dpdxdx		spdx		dpdy1d
     fstp(x87_op_i(0));
     // 	fadd magic						;	dpdy0dx		dpdxdx		spdx		dpdy1d
-    fadd(x87_op_f(magic));
+    fadd(x87_op_mem32(&magic));
     // 	 fxch st(3)						;	dpdy1d		dpdxdx		spdx		dpdy0dx
     fxch(3);
     // 	fadd magic						;	dpdy1dx		dpdxdx		spdx		dpdy0dx
-    fadd(x87_op_f(magic));
+    fadd(x87_op_mem32(&magic));
     // 	 fxch st(2)						;	spdx		dpdxdx		dpdy1dx		dpdy0dx
     fxch(2);
     // 	fstp qword ptr workspaceA.sv			;	dpdxdx		dpdy1dx		dpdy0dx

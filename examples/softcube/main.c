@@ -143,7 +143,7 @@ int main(int argc, char **argv)
     cube->material->flags |= BR_MATF_SMOOTH; // Makes lighting look _much_ better.
     // cube->material->flags |= BR_MATF_DISABLE_COLOUR_KEY;  // Not supported by software.
     // cube->material->opacity = 255; // < 255 selects screendoor renderer
-    cube->render_style = BR_RSTYLE_EDGES;
+    // cube->render_style = BR_RSTYLE_EDGES;
 
     BrMapUpdate(cube->material->colour_map, BR_MAPU_ALL);
     BrMaterialUpdate(cube->material, BR_MATU_ALL);

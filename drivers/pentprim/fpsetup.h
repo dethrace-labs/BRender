@@ -9,8 +9,7 @@ extern struct workspace_t               workspace;
 extern struct ArbitraryWidthWorkspace_t workspaceA;
 extern float                            fp_one;
 extern float                            fp_two;
-extern float                            fp_conv_d;
-extern int32_t                          fp_conv_d2;
+extern uint32_t                         fp_conv_d;
 ;
 
 typedef struct counts_tag_t {
@@ -302,7 +301,7 @@ void REMOVE_INTEGER_PARTS_OF_PARAM(void *param);
 void MULTIPLY_UP_PARAM_VALUES(int32_t s_p, int32_t d_p_x, int32_t d_p_y_0, int32_t d_p_y_1, void *a_sp, void *a_dpx,
                               void *a_dpy1, void *a_dpy0, uint32_t dimension, float magic);
 void SPLIT_INTO_INTEGER_AND_FRACTIONAL_PARTS();
-void MULTIPLY_UP_V_BY_STRIDE(float magic);
+void MULTIPLY_UP_V_BY_STRIDE(uint32_t magic);
 void CREATE_CARRY_VERSIONS();
 void WRAP_SETUP();
 
