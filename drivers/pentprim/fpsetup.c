@@ -6,20 +6,17 @@
 #include <assert.h>
 #include <stdio.h>
 
-double fconv_d16_12[2] = {1.03079215104e11, 1.03079215105e11};
-double fconv_d16_m[2]  = {1.03079215105e11, 1.03079215104e11};
-float  fp_one          = 1.0f;
-float  fp_two          = 2.0f;
-// float  fp_conv_d       = 6.7553994e15; // 0x59C00000;
-// float  fp_conv_d8      = 2.6388279e13;
-// float  fp_conv_d8r     = 1.7293823e18;
+long  fconv_d16_12[2] = {0x04238000000000000, 0x04238000000010000};
+long  fconv_d16_m[2]  = {0x04238000000010000, 0x04238000000000000};
+float fp_one          = 1.0f;
+float fp_two          = 2.0f;
+
 uint32_t fp_conv_d   = 0x59C00000;
-float    fp_conv_d8  = 2.6388279e13;
-float    fp_conv_d8r = 1.7293823e18;
-// float   fp_conv_d16     = 1.0307922e11;
+uint32_t fp_conv_d8  = 0x55C00000;
+uint32_t fp_conv_d8r = 0x5DC00000;
 uint32_t fp_conv_d16 = 0x51C00000;
-float    fp_conv_d24 = 4.0265318e8;
-float    fp_conv_d32 = 1572864.0;
+uint32_t fp_conv_d24 = 0x4DC00000;
+uint32_t fp_conv_d32 = 0x49C00000;
 
 uint16_t fp_single_cw   = 0x107f;
 uint16_t fp_double_cw   = 0x127f;
@@ -436,7 +433,7 @@ count_cont:
     fxch(1);
     // 		fadd	fconv_d16_12[esi*8]	            ;	x_2+C	gm+C	g1+C	x_1		x_m		g2
     assert(esi->uint_val >= 0 && esi->uint_val <= 1);
-    fadd(x87_op_d(fconv_d16_12[esi->uint_val]));
+    fadd(x87_op_mem64(&fconv_d16_12[esi->uint_val]));
     // 		 fxch		st(5)						;	g2		gm+C	g1+C	x_1		x_m		x_2+C
     fxch(5);
     // 		fadd		fp_conv_d16		              ;	g2+C	gm+C	g1+C	x_1		x_m		x_2+C
@@ -444,20 +441,17 @@ count_cont:
     // 		 fxch		st(2)						;	g1+C	gm+C	g2+C	x_1		x_m		x_2+C
     fxch(2);
     // 		fstp real8 ptr [workspace].x1			;	gm+C	g2+C	x_1		x_m		x_2+C
-    // fldi(1.03079215105e11);
     fstp(x87_op_mem64(&workspace.x1));
     // 		fstp real8 ptr [workspace].xm			;	g2+C	x_1		x_m		x_2+C
-    // fldi(1.03079215104e11);
     fstp(x87_op_mem64(&workspace.xm));
     // 		fstp real8 ptr [workspace].x2			;	x_1		x_m		x_2+C
-    // fldi(1.0307921497520703125e11);
     fstp(x87_op_mem64(&workspace.x2));
     // 		fadd	fconv_d16_12[esi*8]				;	x_1+C	x_m		x_2+C
-    fadd(x87_op_d(fconv_d16_12[esi->uint_val]));
+    fadd(x87_op_mem64(&fconv_d16_12[esi->uint_val]));
     // 		fxch		st(1)						;	x_m		x_1+C	x_2+C
     fxch(1);
     // 		fadd	fconv_d16_m[esi*8]				;	x_m+C	x_1+C	x_2+C
-    fadd(x87_op_d(fconv_d16_m[esi->uint_val]));
+    fadd(x87_op_mem64(&fconv_d16_m[esi->uint_val]));
 
     // 	; Load deltas back in registers
     // 	;
@@ -950,7 +944,7 @@ paramNegative:
 
 // MULTIPLY_UP_PARAM_VALUES macro param,dimension,magic ;24 cycles
 void MULTIPLY_UP_PARAM_VALUES(int32_t s_p, int32_t d_p_x, int32_t d_p_y_0, int32_t d_p_y_1, void *a_sp, void *a_dpx,
-                              void *a_dpy1, void *a_dpy0, uint32_t dimension, float magic)
+                              void *a_dpy1, void *a_dpy0, uint32_t dimension, uint32_t magic)
 {
     // ;										st(0)		st(1)		st(2)		st(3)		st(4)		st(5) st(6) st(7)
     assert(x86emu_fpu_stack_top() == -1);
@@ -976,7 +970,7 @@ void MULTIPLY_UP_PARAM_VALUES(int32_t s_p, int32_t d_p_x, int32_t d_p_y_0, int32
     // 	 fxch st(1)						;	spd			dpdxd		dpdy1		dpdy0		d
     fxch(1);
     // 	fadd magic						;	spdx		dpdxd		dpdy1		dpdy0		d
-    fadd(x87_op_f(magic));
+    fadd(x87_op_mem32(&magic));
     // 	 fxch st(3)						;	dpdy0		dpdxd		dpdy1		spdx		d
     fxch(3);
     // 	fmul st,st(4)					;	dpdy0d		dpdxd		dpdy1		spdx		d
@@ -984,7 +978,7 @@ void MULTIPLY_UP_PARAM_VALUES(int32_t s_p, int32_t d_p_x, int32_t d_p_y_0, int32
     // 	 fxch st(1)						;	dpdxd		dpdy0d		dpdy1		spdx		d
     fxch(1);
     // 	fadd magic						;	dpdxdx		dpdy0d		dpdy1		spdx		d
-    fadd(x87_op_f(magic));
+    fadd(x87_op_mem32(&magic));
     // 	 fxch st(2)						;	dpdy1		dpdy0d		dpdxdx		spdx		d
     fxch(2);
     // 	fmul st,st(4)					;	dpdy1d		dpdy0d		dpdxdx		spdx		d
@@ -994,11 +988,11 @@ void MULTIPLY_UP_PARAM_VALUES(int32_t s_p, int32_t d_p_x, int32_t d_p_y_0, int32
     // 	fstp st(0)						;	dpdy0d		dpdxdx		spdx		dpdy1d
     fstp(x87_op_i(0));
     // 	fadd magic						;	dpdy0dx		dpdxdx		spdx		dpdy1d
-    fadd(x87_op_f(magic));
+    fadd(x87_op_mem32(&magic));
     // 	 fxch st(3)						;	dpdy1d		dpdxdx		spdx		dpdy0dx
     fxch(3);
     // 	fadd magic						;	dpdy1dx		dpdxdx		spdx		dpdy0dx
-    fadd(x87_op_f(magic));
+    fadd(x87_op_mem32(&magic));
     // 	 fxch st(2)						;	spdx		dpdxdx		dpdy1dx		dpdy0dx
     fxch(2);
     // 	fstp qword ptr workspaceA.s&param		;	dpdxdx		dpdy1dx		dpdy0dx
