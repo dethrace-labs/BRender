@@ -265,6 +265,11 @@ void fstp(x87_operand dest)
     fpu_pop();
 }
 
+void fadd_st(int dest, int src)
+{
+    *st(dest) += *st(src);
+}
+
 void fadd(x87_operand op)
 {
     float  f;

@@ -7,10 +7,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define DRAW_LR     0
-#define DRAW_RL     1
-#define NON_WRAPPED 0
-#define WRAPPED     1
+#define DRAW_LR           0
+#define DRAW_RL           1
+#define NON_WRAPPED       0
+#define WRAPPED           1
+
+#define WORK_TEXTURE_BASE 0
 
 void TriangleRender_ZT_I8_D16(brp_block *block, ...)
 {
@@ -147,11 +149,6 @@ void Draw_ZT_I8_NWRL()
 
 void Draw_ZT_I8_DWLR()
 {
-    // workspace.topCount = 10;
-    //    X0 256 Y0 176 - 384 304
-    //    X0 256 Y0 176 - 256 304
-    // workspace.d_x1 = 90000;
-    // workspace.topCount = 30;
     DRAW_ZT_I8(&workspace.x1, &workspace.d_x1, DRAW_LR, &workspace.topCount, WRAPPED, 0, 0);
     DRAW_ZT_I8(&workspace.x2, &workspace.d_x2, DRAW_LR, &workspace.bottomCount, WRAPPED, 0, 0);
 }
@@ -165,6 +162,8 @@ void Draw_ZT_I8_DWRL()
 // DRAW_ZT_I8 macro minorX,direction,half,wrap_flag,fogging,blend
 void DRAW_ZT_I8(uint32_t *minorX, uint32_t *d_minorX, char direction, int32_t *halfCount, char wrap_flag, char fogging, char blend)
 {
+    static int last_px = 1;
+
     // 	local drawPixel,drawLine,done,lineDrawn,noPlot,noCarry,returnAddress
     // 	local uPerPixelNoWrapNegative,uPerPixelNoWrapPositive,vPerPixelNoWrapNegative,vPerPixelNoWrapPositive
     // 	local uAboveRetest,uBelowRetest,vAboveRetest,vBelowRetest
@@ -276,7 +275,12 @@ drawPixel:
 
     // 	mov bl,[esi+eax]
     // TODO texture coloring
-    ebx->uint_val = 255; //((uint8_t *)work.texture.base)[esi->uint_val + eax->uint_val];
+
+    ebx->uint_val = ((uint8_t *)work.texture.base)[esi->uint_val + eax->uint_val];
+    if(ebx->uint_val != last_px) {
+        printf("ebx %d (esi: %d eax: %d\n", ebx->uint_val, esi->uint_val, eax->uint_val);
+        last_px = ebx->uint_val;
+    }
 
     // 	test bl,bl
     // 	jz noPlot
@@ -344,9 +348,6 @@ noPlot:
     sbb(x86_op_reg(edx), x86_op_reg(edx));
 
     // 	add_d esi,[workspaceA.dvx+8*edx],direction
-    if(edx->uint_val != 0) {
-        int b = 0;
-    }
     if(direction == DRAW_LR) {
         add(x86_op_reg(esi), x86_op_imm(((uint32_t *)&workspaceA.dvx)[2 * edx->int_val]));
     } else {
@@ -356,16 +357,25 @@ noPlot:
 vBelowRetest:
     // 	cmp esi,work.texture.base
     // 	jae vPerPixelNoWrapNegative
-    // if (esi->uint_val >= work.texture.base)
+    if(esi->int_val >= WORK_TEXTURE_BASE) {
+        goto vPerPixelNoWrapNegative;
+    }
     // 	add esi,work.texture._size
+    esi->int_val += work.texture.size;
     // 	jmp vBelowRetest
+    goto vBelowRetest;
 vPerPixelNoWrapNegative:
 vAboveRetest:
     // 	cmp esi,workspaceA.vUpperBound
     // 	jb vPerPixelNoWrapPositive
+    if(esi->int_val < workspaceA.vUpperBound) {
+        goto vPerPixelNoWrapPositive;
+    }
     // 	sub esi,work.texture._size
+    esi->int_val -= work.texture.size;
     // 	jmp vAboveRetest
-    // vPerPixelNoWrapPositive:
+    goto vAboveRetest;
+vPerPixelNoWrapPositive:
     //  endif
 
     // 	mov eax,workspace.c_u
@@ -525,19 +535,30 @@ void PER_SCAN_ZT(int32_t *halfCount, char wrap_flag, uint32_t *minorX, uint32_t 
     // 	add ebx,workspace.d_&minorX
     ebx->uint_val += *d_minorX;
 
-    // ifidni <wrap_flag>,<WRAPPED>
-    // vBelowRetest:
+// ifidni <wrap_flag>,<WRAPPED>
+vBelowRetest:
     // 	cmp eax,work.texture.base
     // 	jae vPerLineNoWrapNegative
+    if(eax->int_val >= WORK_TEXTURE_BASE) {
+        goto vPerLineNoWrapNegative;
+    }
+
     // 	add eax,work.texture._size
+    eax->int_val += work.texture.size;
     // 	jmp vBelowRetest
-    // vPerLineNoWrapNegative:
-    // vAboveRetest:
+    goto vBelowRetest;
+vPerLineNoWrapNegative:
+vAboveRetest:
     // 	cmp eax,workspaceA.vUpperBound
     // 	jb vPerLineNoWrapPositive
+    if(eax->int_val < workspaceA.vUpperBound) {
+        goto vPerLineNoWrapPositive;
+    }
     // 	sub eax,work.texture._size
+    eax->int_val -= work.texture.size;
     // 	jmp vAboveRetest
-    // vPerLineNoWrapPositive:
+    goto vAboveRetest;
+vPerLineNoWrapPositive:
 
 uBelowRetest:
     // 	cmp edx,0

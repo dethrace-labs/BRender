@@ -170,7 +170,7 @@ struct ArbitraryWidthWorkspace_t {
     uint32_t dvy0f;
 
     int32_t  uUpperBound;
-    uint8_t *vUpperBound;
+    uint32_t vUpperBound;
 
     uint32_t flags;
     char    *retAddress;
@@ -293,7 +293,7 @@ typedef struct workspace_t {
 
 void TriangleSetup_ZT_ARBITRARY(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2);
 void SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2);
-void SETUP_FLOAT_PARAM(int comp, char *param /*unused*/, uint32_t *s_p, uint32_t *d_p_x, float conv, int is_unsigned);
+void SETUP_FLOAT_PARAM(int comp, char *param /*unused*/, uint32_t *s_p, uint32_t *d_p_x, uint32_t conv, int is_unsigned);
 void ARBITRARY_SETUP();
 void SETUP_FLAGS();
 void REMOVE_INTEGER_PARTS_OF_PARAMETERS();

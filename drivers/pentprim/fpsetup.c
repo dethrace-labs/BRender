@@ -39,71 +39,113 @@ struct ArbitraryWidthWorkspace_t workspaceA;
 void TriangleSetup_ZT_ARBITRARY(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
 {
     SETUP_FLOAT(v0, v1, v2);
+
+    // assert(workspace.xm == 0x1011A80u);
+    // assert(workspace.d_xm == 0u);
+    // assert(workspace.x1 == 0x1010000u);
+    // assert(workspace.d_x1 == 0x10000u);
+    // assert(workspace.x2 == 0x173907Cu);
+    // assert(workspace.d_x2 == 0xFF7F3500u);
+
+    // assert(workspace.iarea == 0xB87CDB7Cu);
+    // assert(workspace.dx1_a == 0x3BFE6C80u);
+    // assert(workspace.dx2_a == 0x3BFE6C80u);
+    // assert(workspace.dy1_a == 0x3BFE6C80u);
+    // assert(workspace.dy2_a == 0x80000000u);
+    // assert(workspace.xstep_1 == 0x3F800000u);
+    // assert(workspace.xstep_0 == 0u);
+    // assert(workspace.t_dx == 0x3F658000u);
+    // assert(workspace.t_dy == 0x3F658000u);
+    // assert(workspace.t_y == 0xB1u);
+
     SETUP_FLOAT_PARAM(C_SZ, "_z", &workspace.s_z, &workspace.d_z_x, fp_conv_d16, 1);
+
+    // assert(workspace.s_z == 0xDD3B5200u);
+    // assert(workspace.d_z_x == 0u);
+
     SETUP_FLOAT_PARAM(C_U, "_u", &workspace.s_u, &workspace.d_u_x, fp_conv_d24, 0);
     SETUP_FLOAT_PARAM(C_V, "_v", &workspace.s_v, &workspace.d_v_x, fp_conv_d24, 0);
 
+    // assert(workspace.s_z == 0xDD3B5200u);
+
+    // assert(workspace.s_z == 3711652352u);
+    // assert(workspace.d_z_y_1 == 0u);
+    // assert(workspace.d_z_x == 0u);
+    // assert(workspace.d_z_y_0 == 0u);
+    // assert(workspace.s_i == 0u);
+    // assert(workspace.d_i_y_1 == 0u);
+    // assert(workspace.d_i_x == 0u);
+    // assert(workspace.d_i_y_0 == 0u);
+    // assert(workspace.s_u == 116781u);
+    // assert(workspace.d_u_y_1 == 130265u);
+    // assert(workspace.d_u_x == 130265u);
+    // assert(workspace.d_u_y_0 == 0u);
+    // assert(workspace.s_v == 16660435u);
+    // assert(workspace.d_v_y_1 == 4294837031u);
+    // assert(workspace.d_v_x == 0u);
+    // assert(workspace.d_v_y_0 == 4294837031u);
+    // assert(workspace.s_s == 0u);
+    // assert(workspace.d_s_y_1 == 0u);
+    // assert(workspace.d_s_x == 0u);
+    // assert(workspace.d_s_y_0 == 0u);
+
     ARBITRARY_SETUP();
 
-    // workspace.xm   = 16849536u;
+    // assert(workspace.xm == 16849536u);
+    // assert(workspace.d_xm == 0u);
+    // assert(workspace.x1 == 16842752u);
+    // assert(workspace.d_x1 == 65536u);
+    // assert(workspace.x2 == 24350844u);
+    // assert(workspace.d_x2 == 4286526720u);
 
-    // workspace.d_xm = 0u;
+    // assert(workspace.d_u_x == 130265u);
+    // assert(workspace.d_u_y_1 == 130265u);
 
-    // workspace.x1   = 16842752u;
+    // assert(workspace.d_u_y_0 == 0u);
+    // assert(workspace.s_v == 16660435u);
+    // assert(workspace.d_v_y_1 == 4294837031u);
+    // assert(workspace.d_v_x == 0u);
+    // assert(workspace.d_v_y_0 == 4294837031u);
+    // assert(workspace.s_s == 0u);
+    // assert(workspace.d_s_y_1 == 0u);
+    // assert(workspace.d_s_x == 0u);
+    // assert(workspace.d_s_y_0 == 0u);
 
-    // workspace.d_x1 = 65536u;
+    // assert(workspace.s_z == 3711652352u);
+    // assert(workspace.d_z_y_1 == 0u);
+    // assert(workspace.d_z_x == 0u);
+    // assert(workspace.d_z_y_0 == 0u);
+    // assert(workspace.s_i == 0u);
+    // assert(workspace.d_i_y_1 == 0u);
+    // assert(workspace.d_i_x == 0u);
+    // assert(workspace.d_i_y_0 == 0u);
+    // assert(workspace.s_u == 116781u);
 
-    // workspace.x2   = 24350844u;
-    // workspace.d_x2 = 4286526720u;
-    // workspace.s_z                 = 3711652352u;
-    // workspace.d_z_y_1             = 0u;
-    // workspace.d_z_x               = 0u;
-    // workspace.d_z_y_0             = 0u;
-    // workspace.s_i                 = 0u;
-    // workspace.d_i_y_1             = 0u;
-    // workspace.d_i_x               = 0u;
-    // workspace.d_i_y_0             = 0u;
-    // workspace.s_u                 = 116781u;
-    // workspace.d_u_y_1             = 130265u;
-    // workspace.d_u_x               = 130265u;
-    // workspace.d_u_y_0             = 0u;
-    // workspace.s_v                 = 16660435u;
-    // workspace.d_v_y_1             = 4294837031u;
-    // workspace.d_v_x               = 0u;
-    // workspace.d_v_y_0             = 4294837031u;
-    // workspace.s_s                 = 0u;
-    // workspace.d_s_y_1             = 0u;
-    // workspace.d_s_x               = 0u;
-    // workspace.d_s_y_0             = 0u;
-    // workspace.scanAddress         = 0;
-    // workspace.scanAddressTrashed  = 0u;
-    // workspace.depthAddress        = 0;
-    // workspace.depthAddressTrashed = 0u;
-    // workspace.iarea               = 3095190396u;
-    // workspace.dx1_a               = 1006529664u;
-    // workspace.dx2_a               = 1006529664u;
-    // workspace.dy1_a               = 1006529664u;
-    // workspace.dy2_a               = 2147483648u;
-    // workspace.xstep_1             = 1065353216;
-    // workspace.xstep_0             = 0;
-    // workspace.t_dx                = 1063616512u;
-    // workspace.t_dy                = 1063616512u;
-    // workspace.t_y                 = 177u;
+    // assert(workspace.scanAddress == 0);
+    // assert(workspace.scanAddressTrashed == 0u);
+    // assert(workspace.depthAddress == 0);
+    // assert(workspace.depthAddressTrashed == 0u);
+    // assert(workspace.iarea == 3095190396u);
+    // assert(workspace.dx1_a == 1006529664u);
+    // assert(workspace.dx2_a == 1006529664u);
+    // assert(workspace.dy1_a == 1006529664u);
+    // assert(workspace.dy2_a == 2147483648u);
+    // assert(workspace.xstep_1 == 1065353216);
+    // assert(workspace.xstep_0 == 0);
+    // assert(workspace.t_dx == 1063616512u);
+    // assert(workspace.t_dy == 1063616512u);
+    // assert(workspace.t_y == 177u);
 
-    // workspace.scratch0            = 0u;
-    // workspace.scratch1            = 0u;
-    // workspace.scratch2            = 1110966272u;
-    // workspace.scratch3            = 0u;
-    // workspace.scratch4            = 1110966272u;
-    // workspace.scratch5            = 65536u;
-    // workspace.scratch6            = 1110966272u;
-    // workspace.scratch7            = 0u;
-    // workspace.scratch8            = 1110966272u;
-    // scratch9            = 65536u;
-    // scratch10           = 1110966272u;
-    // scratch11           = 0u;
-    // scratch12           = 1110966272u;
-    // scra
+    // assert(workspace.scratch2 == 0u);
+    // assert(workspace.scratch3 == 0x42380000u);
+    // assert(workspace.scratch4 == 0x10000u);
+    // assert(workspace.scratch5 == 0x42380000u);
+    // assert(workspace.scratch6 == 0u);
+    // assert(workspace.scratch7 == 0x42380000u);
+    // assert(workspace.scratch8 == 0x10000u);
+    // assert(workspace.scratch9 == 0x42380000u);
+    // assert(workspace.scratch10 == 0u);
+    // assert(workspace.scratch11 == 0x42380000u);
 }
 
 void SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
@@ -235,13 +277,13 @@ void SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
     fsub((((brp_vertex *)eax->ptr_val)->comp_f[C_SY]));        //   dsy1	1/2area	dy1*a	dy2		dx1		dx2
     fxch(3);                                                   //   dy2  	1/2area	dy1*a	dsy1	dx1		dx2
     fmul_2(x87_op_i(0), x87_op_i(1));                          //	dy2*a  	1/2area	dy1*a	dsy1	dx1		dx2
-    fld(x87_op_f(((brp_vertex *)edx->ptr_val)->comp_f[C_SY])); //   sy3	 dy2*a  	1/2area	dy1*a	dsy1	dx1		dx2
+    fld(x87_op_f(((brp_vertex *)edx->ptr_val)->comp_f[C_SY])); //   sy3	 dy2*a  	1/2area	dy1*a	dsy1	dx1 dx2
     fsub((((brp_vertex *)ebx->ptr_val)->comp_f[C_SY]));        //   dsy2	dy2*a  	1/2area	dy1*a	dsy1	dx1		dx2
     fxch(5);                                                   //   dx1	  dy2*a 	1/2area	dy1*a	dsy1	dsy2	dx2
 
 count_cont:
     fmul_2(x87_op_i(0), x87_op_i(2));                          //	dx1*a   dy2*a  	1/2area	dy1*a	dsy1	dsy2	dx2
-    fld(x87_op_f(((brp_vertex *)edx->ptr_val)->comp_f[C_SY])); //   sy3	 dx1*a   dy2*a  	1/2area	dy1*a	dsy1	dsy2 dx2
+    fld(x87_op_f(((brp_vertex *)edx->ptr_val)->comp_f[C_SY])); //   sy3	 dx1*a   dy2*a  	1/2area	dy1*a	dsy1 dsy2 dx2
     fsub(((brp_vertex *)eax->ptr_val)->comp_f[C_SY]);          //   dsy3	dx1*a   dy2*a  	1/2area	dy1*a	dsy1	dsy2	dx2
     fxch(7);                                                   //   dx2		dx1*a   dy2*a  	1/2area	dy1*a	dsy1	dsy2	dsy3
     fmul_2(x87_op_i(0), x87_op_i(3));                          //   dx2*a	dx1*a   dy2*a  	1/2area	dy1*a	dsy1	dsy2	dsy3
@@ -261,8 +303,7 @@ count_cont:
     //; gradient_minor1 = dx1.dy2.dy3.R
     //; gradient_minor2 = dy1.dy2.dx3.R
     //;
-    // 													;	0		1		2		3		4		5		6		7
-    // 			fld			st(2)						;	dy3		dy1		dy2		dy3
+    // 													;	0		1		2		3		4		5		6 7 fld st(2) ;	dy3		dy1		dy2		dy3
     fld(x87_op_i(2));
     // 			fmul		st,st(2)					;	dy2*dy3	dy1		dy2		dy3
     fmul_2(x87_op_i(0), x87_op_i(2));
@@ -281,7 +322,7 @@ count_cont:
     fsub((((brp_vertex *)ebx->ptr_val)->comp_f[C_SX]));
     // 			 fxch		 st(2)						;	dx1		dy123	dx2		dy2*dy3	dy1		dy2		dy3
     fxch(2);
-    // 			fld			fp_one						;	1.0		dx1		dy123	dx2		dy2*dy3	dy1		dy2		dy3
+    // 			fld			fp_one						;	1.0		dx1		dy123	dx2		dy2*dy3	dy1		dy2 dy3
     fld(x87_op_f(fp_one));
     // 			fdivrp		st(2),st					;	dx1		R		dx2		dy2*dy3	dy1		dy2		dy3
     fdivrp(2, 0);
@@ -533,7 +574,7 @@ top_zero:
     fld(x87_op_f(fp_one));                                     //	1.0		1/2area	dy1*a	dy2		dx1		dx2
     fxch(3);                                                   //   dy2  	1/2area	dy1*a	1.0		dx1		dx2
     fmul_2(x87_op_i(0), x87_op_i(1));                          //	dy2*a  	1/2area	dy1*a	1.0		dx1		dx2
-    fld(x87_op_f(((brp_vertex *)edx->ptr_val)->comp_f[C_SY])); //   sy3	 dy2*a  	1/2area	dy1*a	1.0		dx1		dx2
+    fld(x87_op_f(((brp_vertex *)edx->ptr_val)->comp_f[C_SY])); //   sy3	 dy2*a  	1/2area	dy1*a	1.0		dx1 dx2
     // fsub		[ebx].comp_f[C_SY*4]		;   dsy2	dy2*a  	1/2area	dy1*a	1.0		dx1		dx2
     fsub(((brp_vertex *)ebx->ptr_val)->comp_f[C_SY]);
     //  fxch	   st(5)						;   dx1	  dy2*a 	1/2area	dy1*a	1.0		dsy2	dx2
@@ -587,7 +628,7 @@ ecx : ptr to       vertex1;
 edx : ptr to       vertex2;
 ebp : ptr to param block;
 ;*/
-void SETUP_FLOAT_PARAM(int comp, char *param /*unused*/, uint32_t *s_p, uint32_t *d_p_x, float conv, int is_unsigned)
+void SETUP_FLOAT_PARAM(int comp, char *param /*unused*/, uint32_t *s_p, uint32_t *d_p_x, uint32_t conv, int is_unsigned)
 {
 
     // 		assume eax: ptr brp_vertex, ebx: ptr brp_vertex, ecx: ptr brp_vertex, edx: ptr brp_vertex
@@ -632,7 +673,7 @@ void SETUP_FLOAT_PARAM(int comp, char *param /*unused*/, uint32_t *s_p, uint32_t
     // 			fmul	[workspace.dx1_a]			;	dp2*c	dp1*b	dp2*a	dp1		fdx
     fmul(*(float *)&workspace.dx1_a);
     // 			fld		[workspace.t_dy]			; 	fdy		dp2*c	dp1*b	dp2*a	dp1		fdx
-    fld(x87_op_f(*(float *)&workspace.dx1_a));
+    fld(x87_op_f(*(float *)&workspace.t_dy));
     // 			 fxch	st(4)						; 	dp1		dp2*c	dp1*b	dp2*a	fdy		fdx
     fxch(4);
     // 			fmul	[workspace.dx2_a]			; 	dp1*d	dp2*c	dp1*b	dp2*a	fdy		fdx
@@ -670,7 +711,7 @@ void SETUP_FLOAT_PARAM(int comp, char *param /*unused*/, uint32_t *s_p, uint32_t
     // 			 fxch	st(1)						; 	pdx*xs0	pdx*xs1	pdy		pdx		param_t	fdy		fdx
     fxch(1);
     // 			fadd	st,st(2)					; 	pdy_0	pdx*xs1	pdy		pdx		param_t	fdy		fdx
-    fadd(x87_op_i(2));
+    fadd_st(0, 2);
     // 			 fxch	st(3)						; 	pdx		pdx*xs1	pdy		pdy_0	param_t	fdy		fdx
     fxch(3);
     // 			fmul	st(6),st					; 	pdx		pdx*xs1	pdy		pdy_0	param_t	fdy		fdx*pdx
@@ -678,7 +719,7 @@ void SETUP_FLOAT_PARAM(int comp, char *param /*unused*/, uint32_t *s_p, uint32_t
     // 			 fxch	st(2)						; 	pdy		pdx*xs1	pdx		pdy_0	param_t	fdy		fdx*pdx
     fxch(2);
     // 			fadd	st(1),st					; 	pdy		pdy_1	pdx		pdy_0	param_t	fdy		fdx*pdx
-    fadd(x87_op_i(1));
+    fadd_st(1, 0);
     // 			fmulp	st(5),st					; 	pdy_1	pdx		pdy_0	param_t	fdy*pdy	fdx*pdx
     fmulp_2(x87_op_i(5), x87_op_i(0));
     // 			 fxch	st(3)						; 	param_t	pdx		pdy_0	pdy_1	fdy*pdy	fdx*pdx
@@ -688,11 +729,11 @@ void SETUP_FLOAT_PARAM(int comp, char *param /*unused*/, uint32_t *s_p, uint32_t
     // 			 fxch	st(1)						; 	pdy_0	pdx		pdy_1	fdy*pdy	fpx+pt
     fxch(1);
     // 			fadd	conv						; 	C+pdy_0	pdx		pdy_1	fdy*pdy	fpx+pt
-    fadd(x87_op_f(conv));
+    fadd(x87_op_mem32(&conv));
     // 			 fxch	st(2)						; 	pdy_1	pdx		C+pdy_0	fdy*pdy	fpx+pt
     fxch(2);
     // 			fadd	conv						; 	C+pdy_1	pdx		C+pdy_0	fdy*pdy	fpx+pt
-    fadd(x87_op_f(conv));
+    fadd(x87_op_mem32(&conv));
     // 			 fxch	st(3)						; 	fdy*pdy	pdx		C+pdy_0	C+pdy_1	fpx+pt
     fxch(3);
     // 			faddp	st(4),st					;	pdx		C+pdy_0	C+pdy_1	pstart
@@ -708,13 +749,13 @@ void SETUP_FLOAT_PARAM(int comp, char *param /*unused*/, uint32_t *s_p, uint32_t
     // 	; 13 cycles
     // 									;	0		1		2		3		4		5		6		7
     // 			fadd	conv			; 	C+pdx	C+pdy_0	C+pdy_1	pstart
-    fadd(x87_op_f(conv));
+    fadd(x87_op_mem32(&conv));
     // 			 fxch	st(3)			; 	pstart	C+pdy_0	C+pdy_1	C+pdx
     fxch(3);
     // ; 1 clock delay
 
     // 			fadd	conv			; 	C+pstrt	C+pdy_0	C+pdy_1	C+pdx
-    fadd(x87_op_f(conv));
+    fadd(x87_op_mem32(&conv));
     // 			 fxch	st(2)			; 	C+pdy_1	C+pdy_0	C+pstrt	C+pdx
     fxch(2);
     // 			fstp	real8 ptr s_p
@@ -753,8 +794,7 @@ void ARBITRARY_SETUP()
     SETUP_FLAGS();
     REMOVE_INTEGER_PARTS_OF_PARAMETERS();
 
-    // param,dimension,magic
-    // MULTIPLY_UP_PARAM_VALUES(v, width_p, fp_conv_d8r);
+    // MULTIPLY_UP_PARAM_VALUES(u, width_p, fp_conv_d8r);
     MULTIPLY_UP_PARAM_VALUES(workspace.s_u, workspace.d_u_x, workspace.d_u_y_0, workspace.d_u_y_1, &workspaceA.su,
                              &workspaceA.dux, &workspaceA.duy1, &workspaceA.duy0, work.texture.width_p, fp_conv_d8r);
 
@@ -788,27 +828,27 @@ void SETUP_FLAGS()
     // 	fld dword ptr[edx+4*C_U]
     fld(x87_op_f(((brp_vertex *)edx->ptr_val)->comp_f[C_U]));
     // 	fadd fp_conv_d16
-    fadd(x87_op_f(fp_conv_d16));
+    fadd(x87_op_mem32(&fp_conv_d16));
     // 	fld dword ptr[eax+4*C_U]
     fld(x87_op_f(((brp_vertex *)eax->ptr_val)->comp_f[C_U]));
     // 	fadd fp_conv_d16
-    fadd(x87_op_f(fp_conv_d16));
+    fadd(x87_op_mem32(&fp_conv_d16));
     // 	fld dword ptr[ecx+4*C_U]
     fld(x87_op_f(((brp_vertex *)ecx->ptr_val)->comp_f[C_U]));
     // 	fadd fp_conv_d16
-    fadd(x87_op_f(fp_conv_d16));
+    fadd(x87_op_mem32(&fp_conv_d16));
     // 	fld dword ptr[edx+4*C_V]
     fld(x87_op_f(((brp_vertex *)edx->ptr_val)->comp_f[C_V]));
     // 	fadd fp_conv_d16
-    fadd(x87_op_f(fp_conv_d16));
+    fadd(x87_op_mem32(&fp_conv_d16));
     // 	fld dword ptr[eax+4*C_V]
     fld(x87_op_f(((brp_vertex *)eax->ptr_val)->comp_f[C_V]));
     // 	fadd fp_conv_d16
-    fadd(x87_op_f(fp_conv_d16));
+    fadd(x87_op_mem32(&fp_conv_d16));
     // 	fld dword ptr[ecx+4*C_V]
     fld(x87_op_f(((brp_vertex *)ecx->ptr_val)->comp_f[C_V]));
     // 	fadd fp_conv_d16
-    fadd(x87_op_f(fp_conv_d16));
+    fadd(x87_op_mem32(&fp_conv_d16));
     // 	 fxch st(2)
     fxch(2);
     // 	fstp qword ptr workspace.scratch0
@@ -914,7 +954,7 @@ void REMOVE_INTEGER_PARTS_OF_PARAM(void *param)
     // 	mov ebp,esi
     mov(x86_op_reg(ebp), x86_op_reg(esi));
     // 	mov eax,param
-    mov(x86_op_reg(ebp), x86_op_mem32(param));
+    mov(x86_op_reg(eax), x86_op_mem32(param));
 
     // 	test eax,80000000h
     // 	jnz paramNegative
@@ -1176,4 +1216,5 @@ void WRAP_SETUP()
     // mov(x86_op_mem32(&workspaceA.vUpperBound), x86_op_reg(eax)); doesn't work with pointers
 
     workspaceA.vUpperBound = ((uint8_t *)work.texture.base) + work.texture.size;
+    workspaceA.vUpperBound = 0 + work.texture.size;
 }

@@ -430,8 +430,11 @@ void GEOMETRY_CALL V1Face_OS_Render(struct br_geometry *self, struct br_renderer
     /*
      * Go through each face in loop
      */
-    int f2 = 1;
+    int count = 0;
     for(f = 0; f < rend.nfaces; f++, fp_vertices++, fp_edges++, fp_eqn++, tfp++) {
+        // if(f != 1) {
+        //     continue;
+        // }
         if(tfp->flag & TFF_VISIBLE) {
 
             rend.current_index = f;
@@ -448,7 +451,7 @@ void GEOMETRY_CALL V1Face_OS_Render(struct br_geometry *self, struct br_renderer
 				rend.temp_vertices+(*fp_vertices)[2],
 				fp_vertices, fp_edges, fp_eqn, tfp);
             // clang-format on
-            // break; // one triangle only
+            break; // one triangle only
 #endif
         }
     }

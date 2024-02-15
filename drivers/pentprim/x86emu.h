@@ -59,7 +59,6 @@ typedef struct x87_operand {
 } x87_operand;
 
 x87_operand x87_op_f(float f);
-x87_operand x87_op_d(double d);
 x87_operand x87_op_i(int i);
 x87_operand x87_op_mem32(void *ptr);
 x87_operand x87_op_mem64(void *ptr);
@@ -76,6 +75,7 @@ void fld(x87_operand op);
 void fild(int val);
 void fsub(float val);
 void fadd(x87_operand op);
+void fadd_st(int dest, int src);
 void faddp(x87_operand op);
 void fsub_2(x87_operand dest, x87_operand src);
 void fsubp_2(x87_operand dest, x87_operand src);
