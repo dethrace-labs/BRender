@@ -162,7 +162,6 @@ void Draw_ZT_I8_DWRL()
 // DRAW_ZT_I8 macro minorX,direction,half,wrap_flag,fogging,blend
 void DRAW_ZT_I8(uint32_t *minorX, uint32_t *d_minorX, char direction, int32_t *halfCount, char wrap_flag, char fogging, char blend)
 {
-    static int last_px = 1;
 
     // 	local drawPixel,drawLine,done,lineDrawn,noPlot,noCarry,returnAddress
     // 	local uPerPixelNoWrapNegative,uPerPixelNoWrapPositive,vPerPixelNoWrapNegative,vPerPixelNoWrapPositive
@@ -200,7 +199,7 @@ void DRAW_ZT_I8(uint32_t *minorX, uint32_t *d_minorX, char direction, int32_t *h
     ecx->uint_val = workspace.xm;
 
 drawLine:
-
+    printf("\nline\n");
     // 	mov ebp,workspace.depthAddress
     ebp->uint_val = workspace.depthAddress;
 
@@ -274,14 +273,8 @@ drawPixel:
     // }
 
     // 	mov bl,[esi+eax]
-    // TODO texture coloring
-
     ebx->uint_val = ((uint8_t *)work.texture.base)[esi->uint_val + eax->uint_val];
-    if(ebx->uint_val != last_px) {
-        printf("ebx %d (esi: %d eax: %d\n", ebx->uint_val, esi->uint_val, eax->uint_val);
-        last_px = ebx->uint_val;
-    }
-
+    printf("%u ", ebx->uint_val);
     // 	test bl,bl
     // 	jz noPlot
     if(ebx->uint_val == 0) {
@@ -323,9 +316,6 @@ drawPixel:
     //     mov [ebp+2*ecx],dx
     // zbuffer
     // 	   mov [edi+ecx],bl
-    if(edi->uint_val + ecx->uint_val > 640 * 480) {
-        int c = 0;
-    }
     ((uint8_t *)work.colour.base)[edi->uint_val + ecx->uint_val] = ebx->bytes[0];
 
     // endif

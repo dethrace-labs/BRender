@@ -59,6 +59,27 @@ int main(int argc, char **argv)
     br_colour    clear_colour;
     br_error     err;
 
+    int load_from_file = 0;
+
+    uint8_t file_buf[640 * 480];
+    int     px_idx = 0;
+
+    if(load_from_file) {
+        FILE *f = fopen("/Users/jeff/Downloads/carma/out.txt", "r");
+
+        while(1) {
+            int res = fgetc(f);
+            if(res == EOF) {
+                break;
+            }
+            char c = (char)res;
+            if(c != ' ' && c != '\x0d' && c != '\x0a') {
+                file_buf[px_idx] = c - 48;
+                px_idx++;
+            }
+        }
+    }
+
     BrBegin();
 
     BrLogSetLevel(BR_LOG_DEBUG);
@@ -148,7 +169,7 @@ int main(int argc, char **argv)
     BrMapUpdate(cube->material->colour_map, BR_MAPU_ALL);
     BrMaterialUpdate(cube->material, BR_MATU_ALL);
 
-    BrMatrix34RotateZ(&cube->t.t.mat, BR_ANGLE_DEG(5));
+    BrMatrix34RotateX(&cube->t.t.mat, BR_ANGLE_DEG(-40));
 
     // light = BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
     //  BrLightEnable(light);
@@ -169,16 +190,26 @@ int main(int argc, char **argv)
             }
         }
 
-        // BrMatrix34PostRotateY(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));
-        // BrMatrix34PostRotateX(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));
+        if(load_from_file) {
 
-        BrRendererFrameBegin();
-        BrPixelmapFill(colour_buffer, 0);
-        BrPixelmapFill(depth_buffer, 0xFFFFFFFF);
-        BrZbSceneRender(world, camera, colour_buffer, depth_buffer);
-        BrRendererFrameEnd();
+            colour_buffer->origin_x = 0;
+            colour_buffer->origin_y = 0;
+            for(int y = 0; y < 480; y++) {
+                memcpy(colour_buffer->pixels + y * colour_buffer->row_bytes, &file_buf[y * 480], 640);
+            }
+            // memcpy(colour_buffer->pixels, file_buf, 640 * 480);
 
-        // draw_info(colour_buffer, cube->material);
+        } else {
+
+            // BrMatrix34PostRotateY(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));
+            // BrMatrix34PostRotateX(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));
+
+            BrRendererFrameBegin();
+            BrPixelmapFill(colour_buffer, 0);
+            BrPixelmapFill(depth_buffer, 0xFFFFFFFF);
+            BrZbSceneRender(world, camera, colour_buffer, depth_buffer);
+            BrRendererFrameEnd();
+        }
 
         BrPixelmapDoubleBuffer(screen, colour_buffer);
     }

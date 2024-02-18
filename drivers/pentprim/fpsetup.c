@@ -5,6 +5,7 @@
 #include "work.h"
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 long  fconv_d16_12[2] = {0x04238000000000000, 0x04238000000010000};
 long  fconv_d16_m[2]  = {0x04238000000010000, 0x04238000000000000};
@@ -146,6 +147,106 @@ void TriangleSetup_ZT_ARBITRARY(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
     // assert(workspace.scratch9 == 0x42380000u);
     // assert(workspace.scratch10 == 0u);
     // assert(workspace.scratch11 == 0x42380000u);
+
+    // TILTED
+    // assert(workspace.xm == 0xFBBDA7u);
+    // assert(workspace.d_xm == 0x1664u);
+    // assert(workspace.x1 == 0xFAC913u);
+    // assert(workspace.d_x1 == 0x13113u);
+    // assert(workspace.x2 == 0x17B4AB5u);
+    // assert(workspace.d_x2 == 0xFFF49131u);
+    // assert(workspace.s_z == 0xDD3B5200u);
+    // assert(workspace.d_z_y_1 == 0u);
+    // assert(workspace.d_z_x == 0u);
+    // assert(workspace.d_z_y_0 == 0u);
+    // assert(workspace.s_i == 0u);
+    // assert(workspace.d_i_y_1 == 0u);
+    // assert(workspace.d_i_x == 0u);
+    // assert(workspace.d_i_y_0 == 0u);
+    // assert(workspace.s_u == 0x8361u);
+    // assert(workspace.d_u_y_1 == 0x1CE93u);
+    // assert(workspace.d_u_x == 0x1FAEAu);
+    // assert(workspace.d_u_y_0 == 0xFFFFD3A9u);
+    // assert(workspace.s_v == 0xFFDFDFu);
+    // assert(workspace.d_v_y_1 == 0xFFFDD8C0u);
+    // assert(workspace.d_v_x == 0xFFFFD3A9u);
+    // assert(workspace.d_v_y_0 == 0xFFFE0516u);
+    // assert(workspace.s_s == 0u);
+    // assert(workspace.d_s_y_1 == 0u);
+    // assert(workspace.d_s_x == 0u);
+    // assert(workspace.d_s_y_0 == 0u);
+    // assert(workspace.iarea == 0xB87CDB77u);
+    // assert(workspace.dx1_a == 0x3C09D006u);
+    // assert(workspace.dx2_a == 0x3BFD74C3u);
+    // assert(workspace.dy1_a == 0x3BE74979u);
+    // assert(workspace.dy2_a == 0xBA315A54u);
+    // assert(workspace.xstep_1 == 0x3F800000u);
+    // assert(workspace.xstep_0 == 0u);
+    // assert(workspace.t_dx == 0x3E868200u);
+    // assert(workspace.t_dy == 0x3D258000u);
+    // assert(workspace.t_y == 0xB6u);
+    // assert(workspace.flip == 0u);
+    // assert(workspace.c_z == 0u);
+    // assert(workspace.c_u == 0u);
+    // assert(workspace.c_v == 0u);
+    // assert(workspace.c_i == 0u);
+    // assert(workspace.v0_x == 0u);
+    // assert(workspace.v1_x == 0u);
+    // assert(workspace.v2_x == 0u);
+    // assert(workspace.v0_y == 0u);
+    // assert(workspace.v1_y == 0u);
+    // assert(workspace.v2_y == 0u);
+    // assert(workspace.top_vertex == 0u);
+    // assert(workspace.xm_f == 0u);
+    // assert(workspace.d_xm_f == 0u);
+    // assert(workspace.topCount == 0x75u);
+    // assert(workspace.bottomCount == 0xAu);
+    // assert(workspace.scratch0 == 0u);
+    // assert(workspace.scratch1 == 0x42380000u);
+    // assert(workspace.scratch2 == 0u);
+    // assert(workspace.scratch3 == 0x42380000u);
+    // assert(workspace.scratch4 == 0x10000u);
+    // assert(workspace.scratch5 == 0x42380000u);
+    // assert(workspace.scratch6 == 0u);
+    // assert(workspace.scratch7 == 0x42380000u);
+    // assert(workspace.scratch8 == 0x10000u);
+    // assert(workspace.scratch9 == 0x42380000u);
+
+    // assert(workspaceA.su == 8408u);
+    // assert(workspaceA.pad0 == 1136132096u);
+    // assert(workspaceA.dux == 32442u);
+    // assert(workspaceA.pad1 == 1136132096u);
+    // // assert(workspaceA.duy1 == 29604u);  //off by 1
+    // assert(workspaceA.pad2 == 1136132096u);
+    // assert(workspaceA.duy0 == 4294964458u);
+    // assert(workspaceA.pad3 == 1136132095u);
+    // assert(workspaceA.sv == 4032u);
+    // assert(workspaceA.pad4 == 1127743488u);
+    // // assert(workspaceA.dvy1 == 4294967232u);
+    // // assert(workspaceA.pad5 == 1127743487u);
+    // // assert(workspaceA.dvy1c == 0u);
+    // // assert(workspaceA.pad6 == 0u);
+    // assert(workspaceA.dvy0 == 4294967232u);
+    // assert(workspaceA.pad7 == 1127743487u);
+    // assert(workspaceA.dvy0c == 0u);
+    // assert(workspaceA.dvxc == 0u);
+    // assert(workspaceA.pad8 == 0u);
+    // assert(workspaceA.dvx == 4294967232u);
+    // assert(workspaceA.pad9 == 1127743487u);
+    // assert(workspaceA.svf == 4160159744u);
+    // assert(workspaceA.dvxf == 4108976128u);
+    // assert(workspaceA.dvy1f == 1982857216u);
+    // assert(workspaceA.dvy0f == 2168782848u);
+    // assert(workspaceA.uUpperBound == 0x400000);
+    // // vUpperBound = 0x7AD4FB8);
+
+    // workspaceA.su = 0x180Du, workspaceA.pad0 = 0x43B80000u, workspaceA.dux = 0x796Fu, workspaceA.pad1 = 0x43B80000u,
+    // workspaceA.duy1 = 0xBB7u, workspaceA.pad2 = 0x43B80000u, workspaceA.duy0 = 0xFFFF9248u,
+    // workspaceA.pad3 = 0x43B7FFFFu, workspaceA.sv = 0xFC0u, workspaceA.pad4 = 0x43380000u, workspaceA.dvy1 =
+    // 0xFFFFFFC0u, workspaceA.pad5 = 0x4337FFFFu, workspaceA.dvy1c = 0u, workspaceA.pad6 = 0u, workspaceA.dvy0 =
+    // 0xFFFFFFC0u, workspaceA.pad7 = 0x4337FFFFu, workspaceA.dvy0c = 0u, workspaceA.dvxc = 0x40u, workspaceA.pad8 = 0u,
+    // workspaceA.dvx = 0u, workspaceA.pad9 = 0x43380000u, workspaceA.svf = 0xE12D0000u, workspaceA.dvxf = 0u,
+    // workspaceA.dvy1f = 0x4BF60000u, workspaceA.dvy0f = 0x4BF60000u, workspaceA.uUpperBound = 0x400000;
 }
 
 void SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
@@ -1217,4 +1318,10 @@ void WRAP_SETUP()
 
     workspaceA.vUpperBound = ((uint8_t *)work.texture.base) + work.texture.size;
     workspaceA.vUpperBound = 0 + work.texture.size;
+
+    uint8_t px[4096];
+    memcpy(px, work.texture.base, 64 * 64);
+    for(int i = 0; i < 4096; i++) {
+        printf("%u , ", px[i]);
+    }
 }

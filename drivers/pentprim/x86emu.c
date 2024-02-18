@@ -571,8 +571,8 @@ void shr(x86_operand dest, int count)
     assert(dest.type == X86_OP_REG);
 
     while(count != 0) {
-        CF = dest.reg->uint_val & 1;
-        dest.reg->uint_val /= 2; // Unsigned divide
+        CF                 = dest.reg->uint_val & 1;
+        dest.reg->uint_val = dest.reg->uint_val / 2; // Unsigned divide
         count--;
     }
 }
@@ -580,9 +580,14 @@ void shr(x86_operand dest, int count)
 void sar(x86_operand dest, int count)
 {
     assert(dest.type == X86_OP_REG);
+    int msb = dest.reg->int_val < 0;
+
     while(count != 0) {
-        CF = dest.reg->uint_val & 1;
-        dest.reg->int_val /= 2; // signed divide
+        CF                = dest.reg->uint_val & 1;
+        dest.reg->int_val = dest.reg->int_val >> 1; // signed divide
+        // if(msb) {
+        //     dest.reg->uint_val |= (1 << 31);
+        // }
         count--;
     }
 }
