@@ -180,7 +180,7 @@ int main(int argc, char **argv)
     // BrMatrix34Scale(&cube->t.t.mat, 5, 5, 5);
     BrMatrix34Translate(&cube->t.t.mat, 0, -0.0, -1.5);
 
-    //  cube->model  = BrModelFind("/opt/CARMA/DATA/MODELS/EAGLE.DAT");
+    cube->model = BrModelFind("/opt/CARMA/DATA/MODELS/EAGLE.DAT");
 
     cube2           = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
     cube2->t.type   = BR_TRANSFORM_MATRIX34;
