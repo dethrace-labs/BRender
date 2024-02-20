@@ -171,10 +171,9 @@ br_device_pixelmap *DevicePixelmapSDL2Allocate(br_device *dev, br_output_facilit
     self->pm_origin_x      = 0;
     self->pm_origin_y      = 0;
     self->pm_type          = type;
-
-    self->owned   = owned;
-    self->surface = surface;
-    self->window  = window;
+    self->owned            = owned;
+    self->surface          = surface;
+    self->window           = window;
 
     if(resync(self) != BRE_OK) {
         BrResFreeNoCallback(self);
@@ -838,6 +837,10 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, match)(br_device_pixelmap *sel
     if(mt.use == BRT_CLONE) {
         mt.type       = self->pm_type;
         mt.pixel_bits = self->surface->format->BitsPerPixel;
+    }
+
+    if(mt.use == BRT_DEPTH) {
+        return BR_CMETHOD(br_device_pixelmap_mem, match)(self, newpm, tv);
     }
 
     /*

@@ -166,16 +166,32 @@ void BR_ASM_CALL OpTriangleTwoSidedConstantSurf(struct brp_block *block, brp_ver
 /*
  * Fix up ugly seams in environment mapping
  */
-void BR_ASM_CALL OpTriangleMappingWrapFix(struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
-                                          br_uint_16 (*fp_vertices)[3], br_uint_16 (*fp_edges)[3], br_vector4 *fp_eqn,
-                                          struct temp_face *tfp)
+void BR_ASM_CALL OpTriangleMappingWrapFix(struct brp_block *block, ...)
 {
+    brp_vertex *v0;
+    brp_vertex *v1;
+    brp_vertex *v2;
+    br_uint_16(*fp_vertices)[3];
+    br_uint_16(*fp_edges)[3];
+    br_vector4       *fp_eqn;
+    struct temp_face *tfp;
+
+    va_list va;
+
+    va_start(va, block);
+    v0          = va_arg(va, brp_vertex *);
+    v1          = va_arg(va, brp_vertex *);
+    v2          = va_arg(va, brp_vertex *);
+    fp_vertices = va_arg(va, br_uint_16(*)[3]);
+    fp_edges    = va_arg(va, br_uint_16(*)[3]);
+    fp_eqn      = va_arg(va, br_vector4 *);
+    tfp         = va_arg(va, struct temp_face *);
+    va_end(va);
+
     br_scalar  scale = BR_ABS(rend.renderer->state.cache.comp_scales[C_U]);
     br_scalar  half  = BR_CONST_DIV(scale, 2);
     br_scalar  d0, d1, d2;
     brp_vertex fixed[3];
-
-    BrFailure("Not implemented: %s:%d", __FILE__, __LINE__);
 
     /*
      * If change in U along any edge is > 0.5, then adjust one of the vertices to bring it
@@ -212,9 +228,7 @@ void BR_ASM_CALL OpTriangleMappingWrapFix(struct brp_block *block, brp_vertex *v
 /*
  * handle relighting of vertices if a triangle is two-sided
  */
-void BR_ASM_CALL OpTriangleRelightTwoSided(struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
-                                           br_uint_16 (*fp_vertices)[3], br_uint_16 (*fp_edges)[3], br_vector4 *fp_eqn,
-                                           struct temp_face *tfp)
+void BR_ASM_CALL OpTriangleRelightTwoSided(struct brp_block *block, ...)
 {
     int         i, v;
     br_vector3 *vp_p;
@@ -224,7 +238,25 @@ void BR_ASM_CALL OpTriangleRelightTwoSided(struct brp_block *block, brp_vertex *
     br_vector3  rev_normal;
     br_colour   colour = scache.colour;
 
-    BrFailure("Not implemented: %s:%d", __FILE__, __LINE__);
+    brp_vertex *v0;
+    brp_vertex *v1;
+    brp_vertex *v2;
+    br_uint_16(*fp_vertices)[3];
+    br_uint_16(*fp_edges)[3];
+    br_vector4       *fp_eqn;
+    struct temp_face *tfp;
+
+    va_list va;
+
+    va_start(va, block);
+    v0          = va_arg(va, brp_vertex *);
+    v1          = va_arg(va, brp_vertex *);
+    v2          = va_arg(va, brp_vertex *);
+    fp_vertices = va_arg(va, br_uint_16(*)[3]);
+    fp_edges    = va_arg(va, br_uint_16(*)[3]);
+    fp_eqn      = va_arg(va, br_vector4 *);
+    tfp         = va_arg(va, struct temp_face *);
+    va_end(va);
 
     if(tfp->flag & TFF_REVERSED) {
 

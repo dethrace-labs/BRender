@@ -451,10 +451,10 @@ void GEOMETRY_CALL V1Face_OS_Render(struct br_geometry *self, struct br_renderer
 				rend.temp_vertices+(*fp_vertices)[2],
 				fp_vertices, fp_edges, fp_eqn, tfp);
             // clang-format on
-            break; // one triangle only
-            if(f > 1) {
-                break;
-            }
+            // break; // one triangle only
+            //  if(f > 1) {
+            //      break;
+            //  }
 #endif
         }
     }

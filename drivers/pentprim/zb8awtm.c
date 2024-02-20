@@ -30,6 +30,8 @@ void TriangleRender_ZT_I8_D16(brp_block *block, ...)
     workspace.v1 = v1;
     workspace.v2 = v2;
 
+    printf("TriangleRender_ZT_I8_D16\n");
+
     TriangleSetup_ZT_ARBITRARY(v0, v1, v2);
 
     //     ; Floating point address calculation - 20 cycles, (Integer=26)
@@ -199,7 +201,6 @@ void DRAW_ZT_I8(uint32_t *minorX, uint32_t *d_minorX, char direction, int32_t *h
     ecx->uint_val = workspace.xm;
 
 drawLine:
-    printf("\nline\n");
     // 	mov ebp,workspace.depthAddress
     ebp->uint_val = workspace.depthAddress;
 
@@ -257,24 +258,24 @@ drawLine:
     // 	shr eax,16
     shr(x86_op_reg(eax), 16);
     // 	lea ebp,[ebp+2*ebx]
+    ebp->uint_val += ebx->uint_val * 2;
     // TODO?
 
 drawPixel:
     // 	mov bx,[ebp+2*ecx]
-    // ebx->uint_val = ((uint16_t *)work.depth.base)[workspace.depthAddress + ecx->uint_val];
+    ebx->uint_val = ((uint16_t *)work.depth.base)[ebp->uint_val / 2 + ecx->int_val];
     // 	mov dx,word ptr workspace.c_z+2
-    // edx->uint_val = ((uint16_t *)&workspace.c_z)[1];
+    edx->uint_val = ((uint16_t *)&workspace.c_z)[1];
 
     // 	cmp dx,bx
     // 	ja noPlot
     // TODO: depth buffering
-    // if(edx->uint_val > ebx->uint_val) {
-    //     goto noPlot;
-    // }
+    if(edx->uint_val > ebx->uint_val) {
+        goto noPlot;
+    }
 
     // 	mov bl,[esi+eax]
     ebx->uint_val = ((uint8_t *)work.texture.base)[esi->uint_val + eax->uint_val];
-    printf("%u ", ebx->uint_val);
     // 	test bl,bl
     // 	jz noPlot
     if(ebx->uint_val == 0) {
@@ -314,9 +315,14 @@ drawPixel:
     //     mov [edi+ecx],bl
     // else
     //     mov [ebp+2*ecx],dx
-    // zbuffer
-    // 	   mov [edi+ecx],bl
+    // printf("depth %d: val %d (%d) ", (ebp->uint_val + ecx->int_val) / 2, *(uint16_t *)&edx->uint_val,
+    //        ((uint16_t *)work.depth.base)[ebp->uint_val / 2 + ecx->int_val]);
+
+    ((uint16_t *)work.depth.base)[ebp->uint_val / 2 + ecx->int_val] = *(uint16_t *)&edx->uint_val;
+
+    // // 	   mov [edi+ecx],bl
     ((uint8_t *)work.colour.base)[edi->uint_val + ecx->uint_val] = ebx->bytes[0];
+    // printf("screen %d\n ", (edi->uint_val + ecx->int_val));
 
     // endif
     // endif

@@ -39,7 +39,9 @@ struct ArbitraryWidthWorkspace_t workspaceA;
 
 void TriangleSetup_ZT_ARBITRARY(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
 {
-    SETUP_FLOAT(v0, v1, v2);
+    if(SETUP_FLOAT(v0, v1, v2) != FPSETUP_SUCCESS) {
+        return;
+    }
 
     // assert(workspace.xm == 0x1011A80u);
     // assert(workspace.d_xm == 0u);
@@ -249,7 +251,7 @@ void TriangleSetup_ZT_ARBITRARY(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
     // workspaceA.dvy1f = 0x4BF60000u, workspaceA.dvy0f = 0x4BF60000u, workspaceA.uUpperBound = 0x400000;
 }
 
-void SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
+int SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
 {
     x86emu_init();
 
@@ -715,9 +717,11 @@ empty_triangle:
     fstp(x87_op_i(0));
     fstp(x87_op_i(0));
     fstp(x87_op_i(0));
+    return FPSETUP_EMPTY_TRIANGLE;
 
 exit:
     assert(x86emu_fpu_stack_top() == -1);
+    return FPSETUP_SUCCESS;
 }
 
 /*; Do all the per-triangle work for a single float parameter
@@ -1319,9 +1323,9 @@ void WRAP_SETUP()
     workspaceA.vUpperBound = ((uint8_t *)work.texture.base) + work.texture.size;
     workspaceA.vUpperBound = 0 + work.texture.size;
 
-    uint8_t px[4096];
-    memcpy(px, work.texture.base, 64 * 64);
-    for(int i = 0; i < 4096; i++) {
-        printf("%u , ", px[i]);
-    }
+    // uint8_t px[4096];
+    // memcpy(px, work.texture.base, 64 * 64);
+    // for(int i = 0; i < 4096; i++) {
+    //     printf("%u , ", px[i]);
+    // }
 }

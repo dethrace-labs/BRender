@@ -53,7 +53,7 @@ static void draw_info(br_pixelmap *screen, br_material *mat)
 int main(int argc, char **argv)
 {
     br_pixelmap *screen = NULL, *colour_buffer = NULL, *depth_buffer = NULL;
-    br_actor    *world, *camera, *cube, *light;
+    br_actor    *world, *camera, *cube, *cube2, *light;
     int          ret = 1;
     br_uint_64   ticks_last, ticks_now;
     br_colour    clear_colour;
@@ -136,40 +136,74 @@ int main(int argc, char **argv)
 
         camera         = BrActorAdd(world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
         camera->t.type = BR_TRANSFORM_MATRIX34;
-        BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(5.0));
+        BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(5));
 
-        camera_data         = (br_camera *)camera->type_data;
-        camera_data->aspect = BR_DIV(BR_SCALAR(colour_buffer->width), BR_SCALAR(colour_buffer->height));
+        camera_data           = (br_camera *)camera->type_data;
+        camera_data->aspect   = BR_DIV(BR_SCALAR(colour_buffer->width), BR_SCALAR(colour_buffer->height));
+        camera_data->hither_z = 0.1f;
     }
 
     BrModelFindHook(BrModelFindFailedLoad);
     BrMapFindHook(BrMapFindFailedLoad);
     BrMaterialFindHook(BrMaterialFindFailedLoad);
 
-    cube         = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-    cube->t.type = BR_TRANSFORM_MATRIX34;
-    cube->model  = BrModelFind("/Users/jeff/code/CrocDE-BRender/examples/dat/cube.dat");
+    br_pixelmap *pm2[1000];
+    int          count = BrPixelmapLoadMany("/opt/CARMA/DATA/PIXELMAP/GASPUMP.PIX", pm2, 1000);
+    BrMapAddMany(pm2, count);
+    br_material *mat2[1000];
+    count = BrMaterialLoadMany("/opt/CARMA/DATA/MATERIAL/GASPUMP.MAT", mat2, 1000);
+    BrMaterialAddMany(mat2, count);
+    for(int i = 0; i < count; i++) {
+        mat2[i]->flags |= BR_MATF_PERSPECTIVE;
+        mat2[i]->flags |= BR_MATF_DITHER;
+        mat2[i]->flags |= BR_MATF_SMOOTH;
+    }
+
+    br_pixelmap *pm3[1000];
+    count = BrPixelmapLoadMany("/opt/CARMA/DATA/PIXELMAP/EAGREDL.PIX", pm3, 1000);
+    BrMapAddMany(pm3, count);
+    br_material *mat3[1000];
+    count = BrMaterialLoadMany("/opt/CARMA/DATA/MATERIAL/EAGLE.MAT", mat3, 1000);
+    BrMaterialAddMany(mat3, count);
 
     br_pixelmap *pm = BrPixelmapLoad("/Users/jeff/code/CrocDE-BRender/examples/dat/checkerboard8.pix");
     BrMapAdd(pm);
 
-#if defined(SOFTCUBE_16BIT)
+    cube           = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    cube->t.type   = BR_TRANSFORM_MATRIX34;
+    cube->model    = BrModelFind("/Users/jeff/code/CrocDE-BRender/examples/dat/cube.dat");
     cube->material = BrMaterialLoad("/Users/jeff/code/CrocDE-BRender/examples/dat/checkerboard8.mat");
+    BrMapUpdate(cube->material->colour_map, BR_MAPU_ALL);
+    BrMaterialUpdate(cube->material, BR_MATU_ALL);
+
+    cube->model = BrModelFind("/opt/CARMA/DATA/MODELS/&00GAS.DAT");
+    // BrMatrix34Scale(&cube->t.t.mat, 5, 5, 5);
+    BrMatrix34Translate(&cube->t.t.mat, 0, -0.0, -1.5);
+
+    //  cube->model  = BrModelFind("/opt/CARMA/DATA/MODELS/EAGLE.DAT");
+
+    cube2           = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    cube2->t.type   = BR_TRANSFORM_MATRIX34;
+    cube2->model    = BrModelFind("/Users/jeff/code/CrocDE-BRender/examples/dat/cube.dat");
+    cube2->material = BrMaterialLoad("/Users/jeff/code/CrocDE-BRender/examples/dat/checkerboard8.mat");
+    BrMapUpdate(cube2->material->colour_map, BR_MAPU_ALL);
+    BrMaterialUpdate(cube2->material, BR_MATU_ALL);
+    // BrMatrix34Translate(&cube2->t.t.mat, 0, 0.5, 0.5);
+
+#if defined(SOFTCUBE_16BIT)
+
 #else
     cube->material = BrMaterialLoad("checkerboard24.mat");
 #endif
 
     // cube->material->flags |= BR_MATF_PERSPECTIVE; // Perspective-correct texture mapping. Doesn't actually work.
     // cube->material->flags |= BR_MATF_DITHER;      // Dithering.
-    cube->material->flags |= BR_MATF_SMOOTH; // Makes lighting look _much_ better.
+    // cube->material->flags |= BR_MATF_SMOOTH; // Makes lighting look _much_ better.
     // cube->material->flags |= BR_MATF_DISABLE_COLOUR_KEY;  // Not supported by software.
     // cube->material->opacity = 255; // < 255 selects screendoor renderer
     // cube->render_style = BR_RSTYLE_EDGES;
 
-    BrMapUpdate(cube->material->colour_map, BR_MAPU_ALL);
-    BrMaterialUpdate(cube->material, BR_MATU_ALL);
-
-    BrMatrix34RotateX(&cube->t.t.mat, BR_ANGLE_DEG(-40));
+    // BrMatrix34RotateX(&cube->t.t.mat, BR_ANGLE_DEG(-40));
 
     // light = BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
     //  BrLightEnable(light);
@@ -201,13 +235,17 @@ int main(int argc, char **argv)
 
         } else {
 
-            // BrMatrix34PostRotateY(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));
-            // BrMatrix34PostRotateX(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));
+            BrMatrix34PostRotateY(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(50) * BR_SCALAR(dt)));
+            BrMatrix34PostRotateX(&cube2->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));
+            //  BrMatrix34PostRotateX(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));
 
             BrRendererFrameBegin();
             BrPixelmapFill(colour_buffer, 0);
             BrPixelmapFill(depth_buffer, 0xFFFFFFFF);
+
             BrZbSceneRender(world, camera, colour_buffer, depth_buffer);
+
+            // BrZbSceneRenderAdd(cube2);
             BrRendererFrameEnd();
         }
 

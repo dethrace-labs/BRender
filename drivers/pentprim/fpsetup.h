@@ -12,6 +12,16 @@ extern float                            fp_two;
 extern uint32_t                         fp_conv_d;
 ;
 
+enum {
+    FPSETUP_SUCCESS,
+    FPSETUP_EMPTY_TRIANGLE
+};
+
+enum {
+    SETUP_SUCCESS,
+    SETUP_ERROR
+};
+
 typedef struct counts_tag_t {
     union {
         uint32_t l;
@@ -292,7 +302,7 @@ typedef struct workspace_t {
 */
 
 void TriangleSetup_ZT_ARBITRARY(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2);
-void SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2);
+int  SETUP_FLOAT(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2);
 void SETUP_FLOAT_PARAM(int comp, char *param /*unused*/, uint32_t *s_p, uint32_t *d_p_x, uint32_t conv, int is_unsigned);
 void ARBITRARY_SETUP();
 void SETUP_FLAGS();
