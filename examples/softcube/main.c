@@ -44,8 +44,8 @@ int main(int argc, char **argv)
     int load_from_file = 0;
 
     uint8_t file_buf[640 * 480];
-    file_buf[-1] = 0;
-    int px_idx   = 0;
+    // file_buf[-1] = 0;
+    int px_idx = 0;
 
     if(load_from_file) {
         FILE *f = fopen("/Users/jeff/Downloads/carma/out.txt", "r");
@@ -152,18 +152,24 @@ int main(int argc, char **argv)
     br_pixelmap *pm = BrPixelmapLoad("/Users/jeff/code/CrocDE-BRender/examples/dat/checkerboard8.pix");
     BrMapAdd(pm);
 
-    cube           = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-    cube->t.type   = BR_TRANSFORM_MATRIX34;
-    cube->model    = BrModelFind("/Users/jeff/code/CrocDE-BRender/examples/dat/cube.dat");
-    cube->material = BrMaterialLoad("/Users/jeff/code/CrocDE-BRender/examples/dat/checkerboard8.mat");
-    BrMapUpdate(cube->material->colour_map, BR_MAPU_ALL);
-    BrMaterialUpdate(cube->material, BR_MATU_ALL);
+    br_model *mod1[1000];
+    count = BrModelLoadMany("/opt/CARMA/DATA/MODELS/EAGLE.DAT", mod1, 1000);
+    BrModelAddMany(mod1, count);
 
-    cube->model = BrModelFind("/opt/CARMA/DATA/MODELS/&00GAS.DAT");
-    // BrMatrix34Scale(&cube->t.t.mat, 5, 5, 5);
-    // BrMatrix34Translate(&cube->t.t.mat, 0, -0.0, 1.5);
+    // cube           = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    cube = BrActorLoad("/opt/CARMA/DATA/ACTORS/EAGLE.ACT");
+    BrActorAdd(world, cube);
+    cube->t.type = BR_TRANSFORM_MATRIX34;
+    // cube->model    = BrModelFind("/Users/jeff/code/CrocDE-BRender/examples/dat/cube.dat");
+    // cube->material = BrMaterialLoad("/Users/jeff/code/CrocDE-BRender/examples/dat/checkerboard8.mat");
+    // BrMapUpdate(cube->material->colour_map, BR_MAPU_ALL);
+    // BrMaterialUpdate(cube->material, BR_MATU_ALL);
 
-    cube->model = BrModelFind("/opt/CARMA/DATA/MODELS/EAGLE.DAT");
+    // cube->model = BrModelFind("/opt/CARMA/DATA/MODELS/&00GAS.DAT");
+    //  BrMatrix34Scale(&cube->t.t.mat, 5, 5, 5);
+    //  BrMatrix34Translate(&cube->t.t.mat, 0, -0.0, 1.5);
+
+    // cube->model = BrModelFind("/opt/CARMA/DATA/MODELS/EAGLE.DAT");
 
     // cube2           = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
     // cube2->t.type   = BR_TRANSFORM_MATRIX34;

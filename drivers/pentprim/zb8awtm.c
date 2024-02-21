@@ -171,7 +171,8 @@ void DRAW_ZT_I8(uint32_t *minorX, uint32_t *d_minorX, char direction, int32_t *h
     // ; height test
 
     // 	mov ebx,workspace.&half&Count
-    mov(x86_op_reg(ebx), x86_op_mem32(halfCount));
+    // mov(x86_op_reg(ebx), x86_op_mem32(halfCount));
+    ebx->int_val = *halfCount;
     // 	lea	eax,returnAddress
     // 	mov workspaceA.retAddress,eax
 
@@ -349,9 +350,11 @@ noPlot:
 
     // 	add_d esi,[workspaceA.dvx+8*edx],direction
     if(direction == DRAW_LR) {
-        add(x86_op_reg(esi), x86_op_imm(((uint32_t *)&workspaceA.dvx)[2 * edx->int_val]));
+        // add(x86_op_reg(esi), x86_op_imm(((uint32_t *)&workspaceA.dvx)[2 * edx->int_val]));
+        esi->uint_val += ((uint32_t *)&workspaceA.dvx)[2 * edx->int_val];
     } else {
-        sub(x86_op_reg(esi), x86_op_imm(((uint32_t *)&workspaceA.dvx)[2 * edx->int_val]));
+        // sub(x86_op_reg(esi), x86_op_imm(((uint32_t *)&workspaceA.dvx)[2 * edx->int_val]));
+        esi->uint_val -= ((uint32_t *)&workspaceA.dvx)[2 * edx->int_val];
     }
     // ifidni <wrap_flag>,<WRAPPED>
 vBelowRetest:
@@ -382,9 +385,11 @@ vPerPixelNoWrapPositive:
     eax->uint_val = workspace.c_u;
     // 	add_d eax,workspaceA.dux,direction
     if(direction == DRAW_LR) {
-        add(x86_op_reg(eax), x86_op_mem32(&workspaceA.dux));
+        // add(x86_op_reg(eax), x86_op_mem32(&workspaceA.dux));
+        eax->uint_val += workspaceA.dux;
     } else {
-        sub(x86_op_reg(eax), x86_op_mem32(&workspaceA.dux));
+        // sub(x86_op_reg(eax), x86_op_mem32(&workspaceA.dux));
+        eax->uint_val -= workspaceA.dux;
     }
     // ifidni <wrap_flag>,<WRAPPED>
 uBelowRetest:
@@ -420,9 +425,11 @@ uPerPixelNoWrapPositive:
     edx->uint_val = workspace.c_z;
     // 	add_d edx,workspace.d_z_x,direction
     if(direction == DRAW_LR) {
-        add(x86_op_reg(edx), x86_op_mem32(&workspace.d_z_x));
+        // add(x86_op_reg(edx), x86_op_mem32(&workspace.d_z_x));
+        edx->uint_val += workspace.d_z_x;
     } else {
-        sub(x86_op_reg(edx), x86_op_mem32(&workspace.d_z_x));
+        // sub(x86_op_reg(edx), x86_op_mem32(&workspace.d_z_x));
+        edx->uint_val -= workspace.d_z_x;
     }
     // 	mov workspace.c_z,edx
     workspace.c_z = edx->uint_val;

@@ -9,7 +9,7 @@ int         fpu_st0_ptr = -1;
 int         ZF          = 0;
 int         CF          = 0;
 int         SF          = 0;
-int         inited      = 0;
+static int  inited      = 0;
 
 x86_reg *eax, *ebx, *ecx, *edx, *esi, *ebp, *edi;
 
@@ -37,13 +37,14 @@ void x86emu_init()
     if(inited) {
         return;
     }
-    eax = malloc(sizeof(x86_reg));
-    ebx = malloc(sizeof(x86_reg));
-    ecx = malloc(sizeof(x86_reg));
-    edx = malloc(sizeof(x86_reg));
-    esi = malloc(sizeof(x86_reg));
-    ebp = malloc(sizeof(x86_reg));
-    edi = malloc(sizeof(x86_reg));
+    eax    = malloc(sizeof(x86_reg));
+    ebx    = malloc(sizeof(x86_reg));
+    ecx    = malloc(sizeof(x86_reg));
+    edx    = malloc(sizeof(x86_reg));
+    esi    = malloc(sizeof(x86_reg));
+    ebp    = malloc(sizeof(x86_reg));
+    edi    = malloc(sizeof(x86_reg));
+    inited = 1;
 }
 void fail()
 {

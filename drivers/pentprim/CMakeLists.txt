@@ -225,9 +225,10 @@ set_target_properties(pentprim PROPERTIES
 #   )
 
 # endif()
-target_compile_options(pentprim PUBLIC -fsanitize=address)
-target_link_options(pentprim
-		BEFORE PUBLIC -fsanitize=undefined PUBLIC -fsanitize=address
-	  )
+
+# target_compile_options(pentprim PUBLIC -fsanitize=address)
+# target_link_options(pentprim
+# 		BEFORE PUBLIC -fsanitize=undefined PUBLIC -fsanitize=address,leak,undefined
+# 	  )
 
 add_library(BRender::Drivers::SoftPrim ALIAS pentprim)
