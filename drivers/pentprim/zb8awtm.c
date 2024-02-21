@@ -30,7 +30,7 @@ void TriangleRender_ZT_I8_D16(brp_block *block, ...)
     workspace.v1 = v1;
     workspace.v2 = v2;
 
-    printf("TriangleRender_ZT_I8_D16\n");
+    // printf("TriangleRender_ZT_I8_D16\n");
 
     TriangleSetup_ZT_ARBITRARY(v0, v1, v2);
 
@@ -205,12 +205,14 @@ drawLine:
     ebp->uint_val = workspace.depthAddress;
 
     // 	shr ebx,16
-    shr(x86_op_reg(ebx), 16);
+    // shr(x86_op_reg(ebx), 16);
+    ebx->uint_val >>= 16;
     // 	mov edi,workspace.scanAddress
     edi->uint_val = workspace.scanAddress;
 
     // 	shr ecx,16
-    shr(x86_op_reg(ecx), 16);
+    // shr(x86_op_reg(ecx), 16);
+    ecx->uint_val >>= 16;
     // 	add edi,ebx
     edi->uint_val += ebx->uint_val;
 
@@ -256,7 +258,8 @@ drawLine:
     eax->uint_val = workspaceA.su;
 
     // 	shr eax,16
-    shr(x86_op_reg(eax), 16);
+    // shr(x86_op_reg(eax), 16);
+    eax->uint_val >>= 16;
     // 	lea ebp,[ebp+2*ebx]
     ebp->uint_val += ebx->uint_val * 2;
     // TODO?
@@ -269,7 +272,6 @@ drawPixel:
 
     // 	cmp dx,bx
     // 	ja noPlot
-    // TODO: depth buffering
     if(edx->uint_val > ebx->uint_val) {
         goto noPlot;
     }
@@ -334,8 +336,10 @@ noPlot:
     // 	add_d edx,workspaceA.dvxf,direction
     if(direction == DRAW_LR) {
         add(x86_op_reg(edx), x86_op_mem32(&workspaceA.dvxf));
+        // edx->uint_val += workspaceA.dvxf;
     } else {
         sub(x86_op_reg(edx), x86_op_mem32(&workspaceA.dvxf));
+        // edx->uint_val -= workspaceA.dvxf;
     }
     // 	mov workspace.c_v,edx
     workspace.c_v = edx->uint_val;
@@ -409,7 +413,8 @@ uPerPixelNoWrapPositive:
     // 	mov workspace.c_u,eax
     workspace.c_u = eax->uint_val;
     // 	sar eax,16
-    sar(x86_op_reg(eax), 16);
+    // sar(x86_op_reg(eax), 16);
+    eax->int_val >>= 16;
 
     // 	mov edx,workspace.c_z
     edx->uint_val = workspace.c_z;
@@ -422,7 +427,8 @@ uPerPixelNoWrapPositive:
     // 	mov workspace.c_z,edx
     workspace.c_z = edx->uint_val;
     // 	shr edx,16
-    shr(x86_op_reg(edx), 16);
+    // shr(x86_op_reg(edx), 16);
+    edx->uint_val >>= 16;
 
     // 	inc_d ecx,direction
     if(direction == DRAW_LR) {

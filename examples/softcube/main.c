@@ -27,27 +27,9 @@ static char primitive_heap[1500 * 1024];
 
 static void draw_info(br_pixelmap *screen, br_material *mat)
 {
-    br_token   pstate_token = BR_NULL_TOKEN;
-    br_object *primstate    = NULL;
-    br_uint_16 font_height  = 0;
+
+    br_uint_16 font_height = 0;
     brp_block *block;
-
-    if((pstate_token = BrTokenFind("PRIMITIVE_STATE_O")) == BR_NULL_TOKEN)
-        return;
-
-    // ObjectQuery(BrV1dbRendererQuery(), &primstate, pstate_token);
-    ObjectQuery(mat->stored, &primstate, pstate_token);
-    if(primstate == NULL)
-        return;
-
-    ObjectQuery(primstate, &block, BRT_PRIMITIVE_BLOCK_P);
-    if(block == NULL)
-        return;
-
-    font_height = BrPixelmapTextHeight(screen, BrFontProp7x9);
-
-    BrPixelmapTextF(screen, -(screen->width / 2) + font_height, -(screen->height / 2) + font_height, 0xFFFFFFFF,
-                    BrFontProp7x9, "Rasteriser: %s", block->identifier);
 }
 
 int main(int argc, char **argv)
@@ -62,7 +44,8 @@ int main(int argc, char **argv)
     int load_from_file = 0;
 
     uint8_t file_buf[640 * 480];
-    int     px_idx = 0;
+    file_buf[-1] = 0;
+    int px_idx   = 0;
 
     if(load_from_file) {
         FILE *f = fopen("/Users/jeff/Downloads/carma/out.txt", "r");
@@ -136,7 +119,7 @@ int main(int argc, char **argv)
 
         camera         = BrActorAdd(world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
         camera->t.type = BR_TRANSFORM_MATRIX34;
-        BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(5));
+        BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(1));
 
         camera_data           = (br_camera *)camera->type_data;
         camera_data->aspect   = BR_DIV(BR_SCALAR(colour_buffer->width), BR_SCALAR(colour_buffer->height));
@@ -178,17 +161,17 @@ int main(int argc, char **argv)
 
     cube->model = BrModelFind("/opt/CARMA/DATA/MODELS/&00GAS.DAT");
     // BrMatrix34Scale(&cube->t.t.mat, 5, 5, 5);
-    BrMatrix34Translate(&cube->t.t.mat, 0, -0.0, -1.5);
+    // BrMatrix34Translate(&cube->t.t.mat, 0, -0.0, 1.5);
 
     cube->model = BrModelFind("/opt/CARMA/DATA/MODELS/EAGLE.DAT");
 
-    cube2           = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-    cube2->t.type   = BR_TRANSFORM_MATRIX34;
-    cube2->model    = BrModelFind("/Users/jeff/code/CrocDE-BRender/examples/dat/cube.dat");
-    cube2->material = BrMaterialLoad("/Users/jeff/code/CrocDE-BRender/examples/dat/checkerboard8.mat");
-    BrMapUpdate(cube2->material->colour_map, BR_MAPU_ALL);
-    BrMaterialUpdate(cube2->material, BR_MATU_ALL);
-    // BrMatrix34Translate(&cube2->t.t.mat, 0, 0.5, 0.5);
+    // cube2           = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    // cube2->t.type   = BR_TRANSFORM_MATRIX34;
+    // cube2->model    = BrModelFind("/Users/jeff/code/CrocDE-BRender/examples/dat/cube.dat");
+    // cube2->material = BrMaterialLoad("/Users/jeff/code/CrocDE-BRender/examples/dat/checkerboard8.mat");
+    // BrMapUpdate(cube2->material->colour_map, BR_MAPU_ALL);
+    // BrMaterialUpdate(cube2->material, BR_MATU_ALL);
+    // // BrMatrix34Translate(&cube2->t.t.mat, 0, 0.5, 0.5);
 
 #if defined(SOFTCUBE_16BIT)
 
@@ -210,6 +193,9 @@ int main(int argc, char **argv)
 
     ticks_last = SDL_GetTicks64();
 
+    Uint32 totalFrameTicks = 0;
+    Uint32 totalFrames     = 0;
+
     for(SDL_Event evt;;) {
         float dt;
 
@@ -224,6 +210,10 @@ int main(int argc, char **argv)
             }
         }
 
+        totalFrames++;
+        Uint32 startTicks = SDL_GetTicks();
+        Uint64 startPerf  = SDL_GetPerformanceCounter();
+
         if(load_from_file) {
 
             colour_buffer->origin_x = 0;
@@ -235,18 +225,39 @@ int main(int argc, char **argv)
 
         } else {
 
-            BrMatrix34PostRotateY(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(50) * BR_SCALAR(dt)));
-            BrMatrix34PostRotateX(&cube2->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));
-            //  BrMatrix34PostRotateX(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));
+            BrMatrix34PostRotateY(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));
+            // BrMatrix34Translate(&cube->t.t.mat, 0, 0.0, -0.1);
+
+            //  BrMatrix34PostRotateX(&cube2->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));
+            //    BrMatrix34PostRotateX(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));
 
             BrRendererFrameBegin();
-            BrPixelmapFill(colour_buffer, 0);
+            BrPixelmapFill(colour_buffer, 255);
             BrPixelmapFill(depth_buffer, 0xFFFFFFFF);
 
             BrZbSceneRender(world, camera, colour_buffer, depth_buffer);
 
-            // BrZbSceneRenderAdd(cube2);
             BrRendererFrameEnd();
+        }
+
+        // End frame timing
+        Uint32 endTicks  = SDL_GetTicks();
+        Uint64 endPerf   = SDL_GetPerformanceCounter();
+        Uint64 framePerf = endPerf - startPerf;
+        float  frameTime = (endTicks - startTicks) / 1000.0f;
+        totalFrameTicks += endTicks - startTicks;
+
+        // Strings to display
+        int fps = 1.0f / frameTime;
+        int avg = 1000.0f / ((float)totalFrameTicks / totalFrames);
+
+        // font_height = BrPixelmapTextHeight(screen, BrFontProp7x9);
+
+        BrPixelmapTextF(colour_buffer, -320, -200, BR_COLOUR_RGBA(255, 255, 0, 255), BrFontProp7x9,
+                        "Current FPS: %d, average: %d", fps, avg);
+
+        if(totalFrames % 60 == 0) {
+            printf("Current FPS: %d, average: %d\n", fps, avg);
         }
 
         BrPixelmapDoubleBuffer(screen, colour_buffer);

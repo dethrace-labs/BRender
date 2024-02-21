@@ -571,8 +571,13 @@ void shr(x86_operand dest, int count)
     assert(dest.type == X86_OP_REG);
 
     while(count != 0) {
-        CF                 = dest.reg->uint_val & 1;
-        dest.reg->uint_val = dest.reg->uint_val / 2; // Unsigned divide
+        CF            = dest.reg->uint_val & 1;
+        uint32_t res1 = dest.reg->uint_val / 2; // Unsigned divide
+        uint32_t res2 = dest.reg->uint_val >> 1;
+        if(res1 != res2) {
+            int a = 0;
+        }
+        dest.reg->uint_val = res1;
         count--;
     }
 }
