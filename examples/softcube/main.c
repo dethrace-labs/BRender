@@ -192,7 +192,7 @@ int main(int argc, char **argv)
     // cube->material->opacity = 255; // < 255 selects screendoor renderer
     // cube->render_style = BR_RSTYLE_EDGES;
 
-    // BrMatrix34RotateX(&cube->t.t.mat, BR_ANGLE_DEG(-40));
+    BrMatrix34RotateX(&cube->t.t.mat, BR_ANGLE_DEG(-20));
 
     // light = BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
     //  BrLightEnable(light);
@@ -231,7 +231,7 @@ int main(int argc, char **argv)
 
         } else {
 
-            BrMatrix34PostRotateY(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));
+            BrMatrix34PostRotateY(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(60) * BR_SCALAR(dt)));
             // BrMatrix34Translate(&cube->t.t.mat, 0, 0.0, -0.1);
 
             //  BrMatrix34PostRotateX(&cube2->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(25) * BR_SCALAR(dt)));

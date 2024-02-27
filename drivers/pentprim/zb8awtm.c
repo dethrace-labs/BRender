@@ -164,7 +164,8 @@ void Draw_ZT_I8_DWRL()
 // DRAW_ZT_I8 macro minorX,direction,half,wrap_flag,fogging,blend
 void DRAW_ZT_I8(uint32_t *minorX, uint32_t *d_minorX, char direction, int32_t *halfCount, char wrap_flag, char fogging, char blend)
 {
-
+    int      cf = 0;
+    uint32_t orig;
     // 	local drawPixel,drawLine,done,lineDrawn,noPlot,noCarry,returnAddress
     // 	local uPerPixelNoWrapNegative,uPerPixelNoWrapPositive,vPerPixelNoWrapNegative,vPerPixelNoWrapPositive
     // 	local uAboveRetest,uBelowRetest,vAboveRetest,vBelowRetest
@@ -335,18 +336,27 @@ noPlot:
     // 	mov edx,workspace.c_v
     edx->uint_val = workspace.c_v;
     // 	add_d edx,workspaceA.dvxf,direction
+    cf = 0;
     if(direction == DRAW_LR) {
-        add(x86_op_reg(edx), x86_op_mem32(&workspaceA.dvxf));
-        // edx->uint_val += workspaceA.dvxf;
+        // add(x86_op_reg(edx), x86_op_mem32(&workspaceA.dvxf));
+
+        edx->uint_val += workspaceA.dvxf;
+        if(edx->uint_val < workspaceA.dvxf) {
+            cf = 1;
+        }
     } else {
-        sub(x86_op_reg(edx), x86_op_mem32(&workspaceA.dvxf));
-        // edx->uint_val -= workspaceA.dvxf;
+        // sub(x86_op_reg(edx), x86_op_mem32(&workspaceA.dvxf));
+        if(workspaceA.dvxf > edx->uint_val) {
+            cf = 1;
+        }
+        edx->uint_val -= workspaceA.dvxf;
     }
     // 	mov workspace.c_v,edx
     workspace.c_v = edx->uint_val;
 
     // 	sbb edx,edx
-    sbb(x86_op_reg(edx), x86_op_reg(edx));
+    // sbb(x86_op_reg(edx), x86_op_reg(edx));
+    edx->uint_val = edx->uint_val - (edx->uint_val + cf);
 
     // 	add_d esi,[workspaceA.dvx+8*edx],direction
     if(direction == DRAW_LR) {
